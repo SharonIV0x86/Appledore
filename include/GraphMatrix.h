@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <optional>
 #include <map>
+#include <stack>
+#include <algorithm>
 
 namespace Appledore
 {
@@ -205,6 +207,51 @@ namespace Appledore
                 }
             }
             return edges;
+        }
+
+        // find all paths b/w two vertices
+        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest)
+        {
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+                throw std::invalid_argument("One or both vertices do not exist");
+
+            std::vector<std::vector<VertexType>> allPaths;
+            std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
+            std::map<VertexType, bool> visited;
+
+            stack.push({src, {src}});
+
+            while (!stack.empty())
+            {
+                auto [current, currentPath] = stack.top();
+                stack.pop();
+                visited[current] = true;
+
+                if (current == dest)
+                {
+                    allPaths.push_back(currentPath);
+                }
+                else
+                {
+                    size_t currentIndex = vertexToIndex[current];
+                    for (size_t i = 0; i < numVertices; ++i)
+                    {
+                        if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
+                        {
+                            VertexType nextVertex = indexToVertex[i];
+                            if (std::find(currentPath.begin(), currentPath.end(), nextVertex) == currentPath.end())
+                            {
+                                auto newPath = currentPath;
+                                newPath.push_back(nextVertex);
+                                stack.push({nextVertex, newPath});
+                            }
+                        }
+                    }
+                }
+                visited[current] = false;
+            }
+
+            return allPaths;
         }
 
     private:
