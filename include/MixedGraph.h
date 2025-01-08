@@ -1,110 +1,190 @@
 #pragma once
 
 #include <vector>
-#include <optional>
-#include <unordered_map>
+#include <iostream>
 #include <stdexcept>
+#include <optional>
+#include <map>
 
-template <typename VertexType, typename EdgeType = bool>
-class MixedGraphMatrix {
-public:
-    MixedGraphMatrix();
-    void addEdge(const VertexType &src, const VertexType &dest, std::optional<EdgeType> edgeValue = {}, bool isDirected = false);
-    void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge);
-    void addEdge(const VertexType &src, const VertexType &dest, bool isDirected);
-    [[nodiscard]] int indegree(const VertexType &vertex) const;
-    [[nodiscard]] int outdegree(const VertexType &vertex) const;
-    [[nodiscard]] int totalDegree(const VertexType &vertex) const;
-    void removeEdge(const VertexType &src, const VertexType &dest);
-    void updateEdge(const VertexType &src, const VertexType &dest, const EdgeType &edgeValue);
+namespace Appledore
+{
+    template <typename EdgeType>
+    struct EdgeInfo
+    {
+        EdgeType value;
+        bool isDirected;
 
-private:
-    std::unordered_map<VertexType, size_t> vertexToIndex;
-    std::vector<VertexType> indexToVertex;
-    std::vector<std::optional<EdgeType>> adjacencyMatrix;
-    size_t numVertices;
+        EdgeInfo() : value(), isDirected(false) {}
+        EdgeInfo(const EdgeType &value, bool isDirected = false)
+            : value(value), isDirected(isDirected) {}
+    };
 
-    size_t getIndex(const VertexType &vertex) const;
-    size_t getIndex(size_t srcIndex, size_t destIndex) const;
-};
+    template <typename VertexType, typename EdgeType = bool>
+    class MixedGraphMatrix
+    {
+    public:
+        MixedGraphMatrix();
 
-// Definitions
+        void addVertex(const VertexType &vertex);
+        void addEdge(const VertexType &src, const VertexType &dest, std::optional<EdgeType> edgeValue = {}, bool isDirected = false);
+        void addEdge(const VertexType &src, const VertexType &dest, bool isDirected);
+        void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge);
+        void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge, bool isDirected);
 
-template <typename VertexType, typename EdgeType>
-MixedGraphMatrix<VertexType, EdgeType>::MixedGraphMatrix() : numVertices(0) {}
+        void removeEdge(const VertexType &src, const VertexType &dest);
+        void updateEdge(const VertexType &src, const VertexType &dest, const EdgeType &newValue);
 
-template <typename VertexType, typename EdgeType>
-size_t MixedGraphMatrix<VertexType, EdgeType>::getIndex(const VertexType &vertex) const {
-    auto it = vertexToIndex.find(vertex);
-    if (it == vertexToIndex.end()) throw std::invalid_argument("Vertex does not exist");
-    return it->second;
-}
+        [[nodiscard]] size_t indegree(const VertexType &vertex) const;
+        [[nodiscard]] size_t outdegree(const VertexType &vertex) const;
+        [[nodiscard]] size_t totalDegree(const VertexType &vertex) const;
 
-template <typename VertexType, typename EdgeType>
-size_t MixedGraphMatrix<VertexType, EdgeType>::getIndex(size_t srcIndex, size_t destIndex) const {
-    return srcIndex * numVertices + destIndex;
-}
+        const std::vector<VertexType> &getVertices() const;
+        bool hasEdge(const VertexType &src, const VertexType &dest) const;
+        EdgeType getEdgeValue(const VertexType &src, const VertexType &dest) const;
+        std::vector<EdgeType> getEdges() const;
 
-template <typename VertexType, typename EdgeType>
-void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, std::optional<EdgeType> edgeValue, bool isDirected) {
-    size_t srcIndex = getIndex(src);
-    size_t destIndex = getIndex(dest);
-    adjacencyMatrix[getIndex(srcIndex, destIndex)] = edgeValue;
-    if (!isDirected) {
-        adjacencyMatrix[getIndex(destIndex, srcIndex)] = edgeValue;
+    private:
+        std::map<VertexType, size_t> vertexToIndex;
+        std::vector<VertexType> indexToVertex;
+        std::vector<std::optional<EdgeInfo<EdgeType>>> adjacencyMatrix;
+        size_t numVertices;
+
+        inline size_t getIndex(size_t src, size_t dest) const;
+    };
+
+    // Constructor
+    template <typename VertexType, typename EdgeType>
+    MixedGraphMatrix<VertexType, EdgeType>::MixedGraphMatrix() : numVertices(0) {}
+
+    // Add a vertex
+    template <typename VertexType, typename EdgeType>
+    void MixedGraphMatrix<VertexType, EdgeType>::addVertex(const VertexType &vertex)
+    {
+        if (vertexToIndex.count(vertex))
+        {
+            std::cout << "Vertex already exists\n";
+            return;
+        }
+
+        size_t newIndex = numVertices++;
+        vertexToIndex[vertex] = newIndex;
+        indexToVertex.push_back(vertex);
+
+        adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
     }
-}
 
-template <typename VertexType, typename EdgeType>
-void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge) {
-    addEdge(src, dest, std::optional<EdgeType>(edge), false);
-}
+    // Add edges (all overloads)
+    template <typename VertexType, typename EdgeType>
+    void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, std::optional<EdgeType> edgeValue, bool isDirected)
+    {
+        if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+        {
+            throw std::invalid_argument("One or both vertices do not exist");
+        }
 
-template <typename VertexType, typename EdgeType>
-void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, bool isDirected) {
-    addEdge(src, dest, std::nullopt, isDirected);
-}
+        size_t srcIndex = vertexToIndex.at(src);
+        size_t destIndex = vertexToIndex.at(dest);
 
-template <typename VertexType, typename EdgeType>
-void MixedGraphMatrix<VertexType, EdgeType>::removeEdge(const VertexType &src, const VertexType &dest) {
-    size_t srcIndex = getIndex(src);
-    size_t destIndex = getIndex(dest);
-    adjacencyMatrix[getIndex(srcIndex, destIndex)] = std::nullopt;
-    adjacencyMatrix[getIndex(destIndex, srcIndex)] = std::nullopt;
-}
+        size_t index = getIndex(srcIndex, destIndex);
+        adjacencyMatrix[index] = EdgeInfo<EdgeType>(edgeValue.value_or(EdgeType()), isDirected);
 
-template <typename VertexType, typename EdgeType>
-void MixedGraphMatrix<VertexType, EdgeType>::updateEdge(const VertexType &src, const VertexType &dest, const EdgeType &edgeValue) {
-    size_t srcIndex = getIndex(src);
-    size_t destIndex = getIndex(dest);
-    adjacencyMatrix[getIndex(srcIndex, destIndex)] = edgeValue;
-}
-
-template <typename VertexType, typename EdgeType>
-[[nodiscard]] int MixedGraphMatrix<VertexType, EdgeType>::indegree(const VertexType &vertex) const {
-    size_t vertexIndex = getIndex(vertex);
-    int degree = 0;
-    for (size_t i = 0; i < numVertices; ++i) {
-        if (adjacencyMatrix[getIndex(i, vertexIndex)].has_value()) {
-            ++degree;
+        if (!isDirected)
+        {
+            size_t reverseIndex = getIndex(destIndex, srcIndex);
+            adjacencyMatrix[reverseIndex] = EdgeInfo<EdgeType>(edgeValue.value_or(EdgeType()), isDirected);
         }
     }
-    return degree;
-}
 
-template <typename VertexType, typename EdgeType>
-[[nodiscard]] int MixedGraphMatrix<VertexType, EdgeType>::outdegree(const VertexType &vertex) const {
-    size_t vertexIndex = getIndex(vertex);
-    int degree = 0;
-    for (size_t i = 0; i < numVertices; ++i) {
-        if (adjacencyMatrix[getIndex(vertexIndex, i)].has_value()) {
-            ++degree;
-        }
+    template <typename VertexType, typename EdgeType>
+    void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, bool isDirected)
+    {
+        addEdge(src, dest, std::nullopt, isDirected);
     }
-    return degree;
-}
 
-template <typename VertexType, typename EdgeType>
-[[nodiscard]] int MixedGraphMatrix<VertexType, EdgeType>::totalDegree(const VertexType &vertex) const {
-    return indegree(vertex) + outdegree(vertex);
-}
+    template <typename VertexType, typename EdgeType>
+    void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge)
+    {
+        addEdge(src, dest, edge, false);
+    }
+
+    template <typename VertexType, typename EdgeType>
+    void MixedGraphMatrix<VertexType, EdgeType>::addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge, bool isDirected)
+    {
+        addEdge(src, dest, std::optional<EdgeType>(edge), isDirected);
+    }
+
+    // Degree-related methods
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::indegree(const VertexType &vertex) const
+    {
+        if (!vertexToIndex.count(vertex))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t vertexIndex = vertexToIndex.at(vertex);
+        size_t inDegreeCount = 0;
+
+        for (size_t src = 0; src < numVertices; ++src)
+        {
+            if (adjacencyMatrix[getIndex(src, vertexIndex)].has_value())
+            {
+                ++inDegreeCount;
+            }
+        }
+
+        return inDegreeCount;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::outdegree(const VertexType &vertex) const
+    {
+        if (!vertexToIndex.count(vertex))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t vertexIndex = vertexToIndex.at(vertex);
+        size_t outDegreeCount = 0;
+
+        for (size_t dest = 0; dest < numVertices; ++dest)
+        {
+            if (adjacencyMatrix[getIndex(vertexIndex, dest)].has_value())
+            {
+                ++outDegreeCount;
+            }
+        }
+
+        return outDegreeCount;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::totalDegree(const VertexType &vertex) const
+    {
+        return indegree(vertex) + outdegree(vertex);
+    }
+
+    // Utility methods
+    template <typename VertexType, typename EdgeType>
+    inline size_t MixedGraphMatrix<VertexType, EdgeType>::getIndex(size_t src, size_t dest) const
+    {
+        return src * numVertices + dest;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    const std::vector<VertexType> &MixedGraphMatrix<VertexType, EdgeType>::getVertices() const
+    {
+        return indexToVertex;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    bool MixedGraphMatrix<VertexType, EdgeType>::hasEdge(const VertexType &src, const VertexType &dest) const
+    {
+        if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+        {
+            throw std::invalid_argument("One or both vertices do not exist");
+        }
+
+        return adjacencyMatrix[getIndex(vertexToIndex.at(src), vertexToIndex.at(dest))].has_value();
+    }
+} // namespace Appledore
