@@ -8,7 +8,6 @@
 #include <stack>
 #include <algorithm>
 #include <set>
-#include "MixedGraph.h"
 
 namespace Appledore
 {
