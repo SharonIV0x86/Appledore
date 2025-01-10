@@ -346,6 +346,24 @@ namespace Appledore
             return allPaths;
         }
 
+    void updateEdge(int fromVertex, int toVertex, int weight) {
+        // Check if graph is unweighted
+        if (!isWeighted) {
+            throw std::runtime_error("Graph is unweighted. Cannot update edge with weight.");
+        }
+
+        // Check if vertices are valid
+        if (fromVertex < 0 || fromVertex >= vertexCount || toVertex < 0 || toVertex >= vertexCount) {
+            throw std::out_of_range("One or both vertices do not exist.");
+        }
+
+        // Update the edge in the adjacency matrix
+        adjacencyMatrix[fromVertex][toVertex] = weight;
+
+        // If the graph is undirected, update the reverse edge
+        adjacencyMatrix[toVertex][fromVertex] = weight;
+    }
+
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;
