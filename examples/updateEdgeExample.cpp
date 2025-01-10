@@ -1,55 +1,28 @@
-#include <iostream>
 #include "../include/GraphMatrix.h"
-
-class ExtendedGraphMatrix : public GraphMatrix {
-public:
-    // Constructor that calls the base class constructor
-    ExtendedGraphMatrix(int vertices, bool weighted) 
-        : GraphMatrix(vertices, weighted) {}
-
-    // Wrapper method for updateEdge to include additional logging
-    void updateEdgeWithLogging(int fromVertex, int toVertex, int weight) {
-        try {
-            updateEdge(fromVertex, toVertex, weight);
-            std::cout << "Edge updated: (" << fromVertex << ", " << toVertex << ") -> " << weight << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "Error updating edge: " << e.what() << std::endl;
-        }
-    }
-
-    // Additional functionality, e.g., removing an edge
-    void removeEdge(int fromVertex, int toVertex) {
-        try {
-            updateEdge(fromVertex, toVertex, 0); // Set weight to 0 to remove the edge
-            std::cout << "Edge removed: (" << fromVertex << ", " << toVertex << ")" << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "Error removing edge: " << e.what() << std::endl;
-        }
-    }
-};
+#include <iostream>
 
 int main() {
     try {
-        // Create an ExtendedGraphMatrix instance
-        ExtendedGraphMatrix graph(5, true); // 5 vertices, weighted graph
+        // Create a weighted graph with 4 vertices
+        GraphMatrix graph(4, true);
 
-        // Update edges using the derived class
-        graph.updateEdgeWithLogging(0, 1, 15); // Add edge (0, 1) with weight 15
-        graph.updateEdgeWithLogging(1, 3, 25); // Add edge (1, 3) with weight 25
-        graph.updateEdgeWithLogging(3, 4, 35); // Add edge (3, 4) with weight 35
+        // Add some edges
+        graph.addEdge(0, 1, 10);
+        graph.addEdge(1, 2, 20);
+        graph.addEdge(2, 3, 30);
 
-        // Display the adjacency matrix
-        std::cout << "Adjacency Matrix after updates:" << std::endl;
+        std::cout << "Original graph:\n";
         graph.display();
 
-        // Remove an edge
-        graph.removeEdge(1, 3); // Remove edge between vertices 1 and 3
+        // Update an edge
+        std::cout << "\nUpdating edge (1, 2) to weight 50.\n";
+        graph.updateEdge(1, 2, 50);
 
-        // Display the adjacency matrix again
-        std::cout << "Adjacency Matrix after removing an edge:" << std::endl;
+        std::cout << "Updated graph:\n";
         graph.display();
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << "\n";
     }
 
     return 0;
