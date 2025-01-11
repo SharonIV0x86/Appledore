@@ -355,14 +355,29 @@ namespace Appledore
             dfs(0, visited);
             return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
         }
-        void dfs(size_t current, std::vector<bool> &visited) const
+
+
+        void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
         {
-            visited[current] = true;
-            for (size_t dest = 0; dest < numVertices; ++dest)
+            std::stack<size_t> stack;
+            stack.push(start);
+        
+            while (!stack.empty())
             {
-                if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
+                size_t current = stack.top();
+                stack.pop();
+        
+                if (!visited[current])
                 {
-                    dfs(dest, visited);
+                    visited[current] = true;
+        
+                    for (size_t dest = 0; dest < numVertices; ++dest)
+                    {
+                        if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
+                        {
+                            stack.push(dest);
+                        }
+                    }
                 }
             }
         }
