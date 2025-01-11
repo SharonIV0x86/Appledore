@@ -34,6 +34,7 @@ namespace Appledore
         void addEdge(const VertexType &src, const VertexType &dest, bool isDirected);
         void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge);
         void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge, bool isDirected);
+        void removeVertex(const VertexType &vert);
 
         const bool operator()(VertexType src, VertexType dest) const
         {
@@ -232,5 +233,58 @@ namespace Appledore
         }
         return edges;
     }
+
+    // ---------------------------------------------------
+    // New method to remove a vertex from the graph
+    // ---------------------------------------------------
+    template <typename VertexType, typename EdgeType>
+    void MixedGraphMatrix<VertexType, EdgeType>::removeVertex(const VertexType &vert)
+    {
+        if (!vertexToIndex.count(vert))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t removeIndex = vertexToIndex[vert];
+
+        // Step 1: Remove entry from map and the corresponding entry in indexToVertex
+        vertexToIndex.erase(vert);
+
+        // Step 2: We will re-map the last vertex in `indexToVertex` to fill the gap
+        if (removeIndex != numVertices - 1)
+        {
+            VertexType lastVertex = indexToVertex[numVertices - 1];
+
+            indexToVertex[removeIndex] = lastVertex;
+
+            vertexToIndex[lastVertex] = removeIndex;
+        }
+
+        indexToVertex.pop_back();
+        --numVertices;
+
+        // Step 3: Rebuild the adjacencyMatrix to remove the row and column of `removeIndex`
+        std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(numVertices * numVertices, std::nullopt);
+
+        for (size_t i = 0; i <= numVertices; ++i)
+        {
+            if (i == removeIndex) continue; 
+
+            for (size_t j = 0; j <= numVertices; ++j)
+            {
+                if (j == removeIndex) continue; 
+                if (i < numVertices && j < numVertices)
+                {
+                    size_t oldRow = (i < removeIndex) ? i : i + 1;
+                    size_t oldCol = (j < removeIndex) ? j : j + 1;
+
+                    newMatrix[i * numVertices + j] = adjacencyMatrix[oldRow * (numVertices + 1) + oldCol];
+                }
+            }
+        }
+
+        adjacencyMatrix = std::move(newMatrix);
+    }
+    // ---------------------------------------------------
 
 };
