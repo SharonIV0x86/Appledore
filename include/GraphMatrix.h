@@ -352,7 +352,7 @@ namespace Appledore
             if (isDirected)
                 return false;
             std::vector<bool> visited(numVertices, false);
-            dfs(0, visited);
+            dfsforConnectivity(0, visited);
             return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
         }
 
