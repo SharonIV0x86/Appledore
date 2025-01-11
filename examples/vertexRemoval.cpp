@@ -4,7 +4,7 @@
 using namespace Appledore;
 
 
-class City : public GraphVertex
+class City
 {
 public:
     std::string name;
@@ -16,6 +16,9 @@ public:
     {
         os << city.name;
         return os;
+    }
+    friend bool operator<(const City& l, const City& r){
+        return l.name < r.name;
     }
 };
 

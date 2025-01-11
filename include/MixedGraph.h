@@ -34,6 +34,7 @@ namespace Appledore
         void addEdge(const VertexType &src, const VertexType &dest, bool isDirected);
         void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge);
         void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge, bool isDirected);
+        void removeVertex(const VertexType &vert);
 
         const bool operator()(VertexType src, VertexType dest) const
         {
