@@ -1,4 +1,4 @@
-#include "MixedGraph.h"
+#include "../include/MixedGraph.h"
 #include <iostream>
 #include <string>
 
@@ -10,8 +10,8 @@ int main()
     graph.addVertex("B");
     graph.addVertex("C");
 
-    graph.addEdge("A", "B", true);  // Directed edge A -> B
-    graph.addEdge("B", "C");       // Undirected edge B <-> C
+    graph.addEdge("A", "B", std::nullopt,true);  // Directed edge A -> B
+    graph.addEdge("B", "C", std::nullopt);       // Undirected edge B <-> C
 
     std::cout << "Vertices: ";
     for (const auto &vertex : graph.getVertices())
