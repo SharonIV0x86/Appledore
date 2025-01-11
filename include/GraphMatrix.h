@@ -346,6 +346,8 @@ namespace Appledore
             return allPaths;
         }
 
+       
+
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;
