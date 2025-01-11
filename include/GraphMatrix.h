@@ -345,6 +345,27 @@ namespace Appledore
 
             return allPaths;
         }
+        [[nodiscard]] bool isConnected() const
+        {
+            if (numVertices == 0)
+                return true;
+            if (isDirected)
+                return false;
+            std::vector<bool> visited(numVertices, false);
+            dfs(0, visited);
+            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+        }
+        void dfs(size_t current, std::vector<bool> &visited) const
+        {
+            visited[current] = true;
+            for (size_t dest = 0; dest < numVertices; ++dest)
+            {
+                if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
+                {
+                    dfs(dest, visited);
+                }
+            }
+        }
 
     private:
         std::map<VertexType, size_t> vertexToIndex;
