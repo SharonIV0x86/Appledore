@@ -44,6 +44,7 @@ namespace Appledore
         EdgeType value;
 
         EdgeInfo(const EdgeType &value) : value(value) {}
+        EdgeInfo() {}
     };
 
     // GraphMatrix class template
