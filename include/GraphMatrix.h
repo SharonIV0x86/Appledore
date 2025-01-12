@@ -346,6 +346,36 @@ namespace Appledore
             return allPaths;
         }
 
+        // get the list of isolated vertices
+        [[nodiscard]] std::vector<VertexType> getIsolated() const
+        {
+            if (numVertices == 0)
+            {
+                throw std::runtime_error("Graph is empty. No vertices available.");
+            }
+
+            std::vector<VertexType> isolatedVertices;
+
+            for (const auto &vertex : indexToVertex)
+            {
+                if (vertexToIndex.find(vertex) == vertexToIndex.end())
+                {
+                    throw std::invalid_argument("Vertex does not exist in the graph.");
+                }
+
+                if (totalDegree(vertex) == 0)
+                {
+                    isolatedVertices.push_back(vertex);
+                }
+            }
+
+            if (isolatedVertices.empty())
+            {
+                throw std::runtime_error("No isolated vertices found in the graph.");
+            }
+
+            return isolatedVertices;
+        }
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;
