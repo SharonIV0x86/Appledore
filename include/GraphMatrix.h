@@ -346,53 +346,49 @@ namespace Appledore
 
             return allPaths;
         }
+        [[nodiscard]] bool isConnected() const
+        {
+            if (numVertices == 0)
+                return true;
+            if (isDirected)
+                return false;
+            std::vector<bool> visited(numVertices, false);
+            dfsforConnectivity(0, visited);
+            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+        }
+
+
+        void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
+        {
+            std::stack<size_t> stack;
+            stack.push(start);
+        
+            while (!stack.empty())
+            {
+                size_t current = stack.top();
+                stack.pop();
+        
+                if (!visited[current])
+                {
+                    visited[current] = true;
+        
+                    for (size_t dest = 0; dest < numVertices; ++dest)
+                    {
+                        if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
+                        {
+                            stack.push(dest);
+                        }
+                    }
+                }
+            }
+        }
 
          // ---------------------------------------------------------
         // NEW METHOD: removeVertex() 
         // ---------------------------------------------------------
-        void removeVertex(const VertexType &vert)
-        {
-            if (!vertexToIndex.count(vert))
-            {
-                throw std::invalid_argument("Vertex does not exist in the graph.");
-            }
 
-            size_t remIdx = vertexToIndex[vert];
-            size_t lastIdx = numVertices - 1;
 
-            // Swap row/column of the vertex to be removed with the last vertex, if needed
-            if (remIdx != lastIdx)
-            {
-                for (size_t c = 0; c < numVertices; ++c)
-                {
-                    adjacencyMatrix[getIndex(remIdx, c)] =
-                        adjacencyMatrix[getIndex(lastIdx, c)];
-                }
-                for (size_t r = 0; r < numVertices; ++r)
-                {
-                    adjacencyMatrix[getIndex(r, remIdx)] =
-                        adjacencyMatrix[getIndex(r, lastIdx)];
-                }
-                VertexType movedVertex = indexToVertex[lastIdx];
-                vertexToIndex[movedVertex] = remIdx;
-                indexToVertex[remIdx] = movedVertex;
-            }
 
-            // Clear the last row/column
-            for (size_t i = 0; i < numVertices; ++i)
-            {
-                adjacencyMatrix[getIndex(i, lastIdx)] = std::nullopt;
-                adjacencyMatrix[getIndex(lastIdx, i)] = std::nullopt;
-            }
-
-            // Erase the vertex from data structures
-            vertexToIndex.erase(vert);
-            indexToVertex.pop_back();
-            numVertices--;
-
-            // Resize adjacencyMatrix
-            adjacencyMatrix.resize(numVertices * numVertices);
-        }
 
     private:
         std::map<VertexType, size_t> vertexToIndex;
