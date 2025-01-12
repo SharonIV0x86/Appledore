@@ -302,10 +302,20 @@ namespace Appledore
         }
 
         // find all paths b/w two vertices
-        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest)
+        // Modifying the findAllPaths method, adding the pathLimit parameter
+        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest, size_t pl = 0)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
                 throw std::invalid_argument("One or both vertices do not exist");
+
+            if (pl < 0)
+                throw std :: invalid_argument("Path limit must be a non-negative integer!\n"); 
+                
+            // Compute the total number of paths using DFS
+            size_t totalPaths = countPathsDFS(src, dest);
+            
+            if (pl > 0 && pl > totalPaths)
+                throw std::invalid_argument("Path limit exceeds the total number of possible paths");
 
             std::vector<std::vector<VertexType>> allPaths;
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
@@ -322,6 +332,12 @@ namespace Appledore
                 if (current == dest)
                 {
                     allPaths.push_back(currentPath);
+
+                    // To check if the path limit has been reached
+                    if (allPaths.size() >= pl && pl > 0)
+                    {
+                        break;
+                    }
                 }
                 else
                 {
@@ -346,7 +362,50 @@ namespace Appledore
             return allPaths;
         }
 
-         // ---------------------------------------------------------
+        // ---------------------------------------------------------
+        // NEW METHOD: countPathsDFS()
+        // Helper Function to count the number of total paths between two vertices using DFS
+        // ---------------------------------------------------------
+        size_t countPathsDFS(const VertexType &src, const VertexType &dest)
+        {
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+                throw std::invalid_argument("One or both vertices do not exist");
+            
+            std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
+            size_t pathCount = 0;
+
+            while (!stack.empty())
+            {
+                auto [current, currentPath] = stack.top();
+                stack.pop();
+
+                if (current == dest)
+                {
+                    pathCount++;
+                }
+                else
+                {
+                    size_t currentIndex = vertexToIndex[current];
+                    for (size_t i = 0; i < numVertices; ++i)
+                    {
+                        if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
+                        {
+                            VertexType nextVertex = indexToVertex[i];
+                            if (std::find(currentPath.begin(), currentPath.end(), nextVertex) == currentPath.end())
+                            {
+                                auto newPath = currentPath;
+                                newPath.push_back(nextVertex);
+                                stack.push({nextVertex, newPath});
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return pathCount;
+        }
+
+        // ---------------------------------------------------------
         // NEW METHOD: removeVertex() 
         // ---------------------------------------------------------
         void removeVertex(const VertexType &vert)
