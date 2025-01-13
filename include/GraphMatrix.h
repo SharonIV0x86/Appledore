@@ -206,7 +206,7 @@ namespace Appledore
             return edges;
         }
         // Get indegree for a vertex
-        [[nodiscard]] size_t indegree(const VertexType& vertex) const
+        [[nodiscard]] size_t indegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -229,7 +229,7 @@ namespace Appledore
             return indegree;
         }
         // Get outdegree for a vertex
-        [[nodiscard]] size_t outdegree(const VertexType& vertex) const
+        [[nodiscard]] size_t outdegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -252,7 +252,7 @@ namespace Appledore
             return outdegree;
         }
         // Get totalDegree for a vertex
-        [[nodiscard]] size_t totalDegree(const VertexType& vertex) const
+        [[nodiscard]] size_t totalDegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -272,7 +272,7 @@ namespace Appledore
             return totaldegree;
         }
         // Get neighbors for a vertex
-        std::set<VertexType> getNeighbors(const VertexType& vertex) const
+        std::set<VertexType> getNeighbors(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -369,13 +369,9 @@ namespace Appledore
                 }
             }
 
-            if (isolatedVertices.empty())
-            {
-                throw std::runtime_error("No isolated vertices found in the graph.");
-            }
-
             return isolatedVertices;
         }
+
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;
