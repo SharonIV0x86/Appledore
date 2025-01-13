@@ -451,6 +451,27 @@ namespace Appledore
             return isolatedVertices;
         }
 
+    void updateEdge(const VertexType& fromVertex, const VertexType& toVertex, const EdgeType& weight) {
+        // Check if the graph is weighted
+        if (!isWeighted) {
+            throw std::runtime_error("Graph is unweighted. Cannot update edge with weight.");
+        }
+
+        // Check if vertices exist
+        if (adjacencyList.find(fromVertex) == adjacencyList.end() ||
+            adjacencyList.find(toVertex) == adjacencyList.end()) {
+            throw std::out_of_range("One or both vertices do not exist.");
+        }
+
+        // Update the edge
+        adjacencyList[fromVertex][toVertex] = weight;
+
+        // If the graph is undirected, update the reverse edge
+        if (!isDirected) {
+            adjacencyList[toVertex][fromVertex] = weight;
+        }
+    }
+
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;
