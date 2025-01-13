@@ -207,7 +207,7 @@ namespace Appledore
             return edges;
         }
         // Get indegree for a vertex
-        [[nodiscard]] size_t indegree(const VertexType& vertex) const
+        [[nodiscard]] size_t indegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -230,7 +230,7 @@ namespace Appledore
             return indegree;
         }
         // Get outdegree for a vertex
-        [[nodiscard]] size_t outdegree(const VertexType& vertex) const
+        [[nodiscard]] size_t outdegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -253,7 +253,7 @@ namespace Appledore
             return outdegree;
         }
         // Get totalDegree for a vertex
-        [[nodiscard]] size_t totalDegree(const VertexType& vertex) const
+        [[nodiscard]] size_t totalDegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -273,7 +273,7 @@ namespace Appledore
             return totaldegree;
         }
         // Get neighbors for a vertex
-        std::set<VertexType> getNeighbors(const VertexType& vertex) const
+        std::set<VertexType> getNeighbors(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -389,6 +389,32 @@ namespace Appledore
 
 
 
+
+        // get the list of isolated vertices
+        [[nodiscard]] std::vector<VertexType> getIsolated() const
+        {
+            if (numVertices == 0)
+            {
+                throw std::runtime_error("Graph is empty. No vertices available.");
+            }
+
+            std::vector<VertexType> isolatedVertices;
+
+            for (const auto &vertex : indexToVertex)
+            {
+                if (vertexToIndex.find(vertex) == vertexToIndex.end())
+                {
+                    throw std::invalid_argument("Vertex does not exist in the graph.");
+                }
+
+                if (totalDegree(vertex) == 0)
+                {
+                    isolatedVertices.push_back(vertex);
+                }
+            }
+
+            return isolatedVertices;
+        }
 
     private:
         std::map<VertexType, size_t> vertexToIndex;
