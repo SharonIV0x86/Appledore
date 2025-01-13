@@ -8,7 +8,6 @@
 
 namespace Appledore {
 
-    // SFINAE Trait to detect if type T can be streamed to std::ostream
     template<typename T, typename = void>
     struct is_streamable : std::false_type {};
 
@@ -18,13 +17,12 @@ namespace Appledore {
         std::void_t<decltype(std::declval<std::ostream&>() << std::declval<const T&>())>
     > : std::true_type {};
 
-    // Helper functions to convert any type to string with proper fallback for non-streamable types
     inline std::string toString(const std::string& value) {
         return value;
     }
 
     template<typename T>
-    std::enable_if_t<is_streamable<T>::value, std::string>
+    std::enable_if_t<std::is_fundamental<T>::value || is_streamable<T>::value && std::is_fundamental<T>::value, std::string>
     toString(const T& value) {
         std::ostringstream ss;
         ss << value;
@@ -32,12 +30,11 @@ namespace Appledore {
     }
 
     template<typename T>
-    std::enable_if_t<!is_streamable<T>::value, std::string>
+    std::enable_if_t<!std::is_fundamental<T>::value || !is_streamable<T>::value, std::string>
     toString(const T&) {
-        return std::string{"[Unprintable type: "} + typeid(T).name() + "]";
+        return std::string{"[Type: "} + typeid(T).name() + "]";
     }
 
-    // Base exception class for all graph-related errors
     class GraphException : public std::exception {
     public:
         explicit GraphException(std::string message)
@@ -53,11 +50,10 @@ namespace Appledore {
             return m_message;
         }
 
-    protected:
+    private:
         std::string m_message;
     };
 
-    // Exception for operations on non-existent vertices
     class VertexNotFoundException : public GraphException {
     public:
         template<typename T>
@@ -83,7 +79,6 @@ namespace Appledore {
         }
     };
 
-    // Exception for operations on non-existent edges
     class EdgeNotFoundException : public GraphException {
     public:
         template<typename T>
@@ -112,7 +107,6 @@ namespace Appledore {
         }
     };
 
-    // Exception for adding duplicate vertices
     class DuplicateVertexException : public GraphException {
     public:
         template<typename T>
@@ -138,12 +132,11 @@ namespace Appledore {
         }
     };
 
-    // Exception for invalid edge operations (e.g., adding edges between non-existent vertices)
     class InvalidEdgeOperationException : public GraphException {
     public:
         template<typename T>
         InvalidEdgeOperationException(const T& source, const T& target,
-                                      const std::string& reason)
+                                    const std::string& reason)
             : GraphException(formatMessage(source, target, reason))
             , m_sourceId(toString(source))
             , m_targetId(toString(target))
@@ -166,7 +159,7 @@ namespace Appledore {
 
         template<typename T>
         static std::string formatMessage(const T& s, const T& t,
-                                         const std::string& reason) {
+                                       const std::string& reason) {
             std::ostringstream oss;
             oss << "Invalid edge operation between vertices: "
                 << toString(s) << " -> " << toString(t)
@@ -175,7 +168,6 @@ namespace Appledore {
         }
     };
 
-    // Generic exception for unexpected graph operations
     class GraphOperationException : public GraphException {
     public:
         explicit GraphOperationException(std::string operation, std::string reason)
@@ -198,7 +190,7 @@ namespace Appledore {
         std::string m_reason;
 
         static std::string formatMessage(const std::string& op,
-                                         const std::string& reason) {
+                                       const std::string& reason) {
             return "Graph operation '" + op + "' failed: " + reason;
         }
     };
