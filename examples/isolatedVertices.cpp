@@ -7,16 +7,11 @@ int main()
 {
     try
     {
-        // Directed unweighted graph
-        using VertexType = int; 
-        using EdgeType = bool; 
-        using Direction = DirectedG; 
-        GraphMatrix<VertexType, EdgeType, Direction> directedUnweightedGraph;
+        GraphMatrix<int, UnweightedG, DirectedG> directedUnweightedGraph;
 
         directedUnweightedGraph.addVertex(1, 2, 3, 4, 5);
-        directedUnweightedGraph.addEdge(1, 2, true);
-        directedUnweightedGraph.addEdge(3, 4, true);
-        // directedUnweightedGraph.addEdge(3, 5, true);
+        directedUnweightedGraph.addEdge(1, 2);
+        directedUnweightedGraph.addEdge(3, 4);
 
         std::cout << "Directed unweighted graph - Isolated vertices: ";
         for (const auto &vertex : directedUnweightedGraph.getIsolated())
@@ -25,13 +20,10 @@ int main()
         }
         std::cout << std::endl;
 
-        // Undirected unweighted graph
-        using UndirectedEdgeType = bool; 
-        using UndirectedDirection = UndirectedG; 
-        GraphMatrix<VertexType, UndirectedEdgeType, UndirectedDirection> undirectedUnweightedGraph;
+        GraphMatrix<int, UnweightedG, UndirectedG> undirectedUnweightedGraph;
 
         undirectedUnweightedGraph.addVertex(6, 7, 8, 9);
-        undirectedUnweightedGraph.addEdge(6, 7, true);
+        undirectedUnweightedGraph.addEdge(6, 7);
 
         std::cout << "Undirected unweighted graph - Isolated vertices: ";
         for (const auto &vertex : undirectedUnweightedGraph.getIsolated())
@@ -40,10 +32,7 @@ int main()
         }
         std::cout << std::endl;
 
-        // Directed weighted graph
-        using WeightedEdgeType = int; 
-        using WeightedDirection = DirectedG; 
-        GraphMatrix<VertexType, WeightedEdgeType, WeightedDirection> directedWeightedGraph;
+        GraphMatrix<int, int, DirectedG> directedWeightedGraph;
 
         directedWeightedGraph.addVertex(10, 11, 12);
         directedWeightedGraph.addEdge(10, 11, 50);
@@ -55,10 +44,7 @@ int main()
         }
         std::cout << std::endl;
 
-        // Undirected weighted graph
-        using UndirectedWeightedEdgeType = int; 
-        using UndirectedWeightedDirection = UndirectedG; 
-        GraphMatrix<VertexType, UndirectedWeightedEdgeType, UndirectedWeightedDirection> undirectedWeightedGraph;
+        GraphMatrix<int, int, UndirectedG> undirectedWeightedGraph;
 
         undirectedWeightedGraph.addVertex(13, 14, 15);
         undirectedWeightedGraph.addEdge(13, 14, 75);
