@@ -383,11 +383,46 @@ namespace Appledore
             }
         }
 
-         // ---------------------------------------------------------
-        // NEW METHOD: removeVertex() 
-        // ---------------------------------------------------------
 
 
+         void removeVertex(const VertexType &vert) {
+
+            if (!vertexToIndex.count(vert)) {
+                throw std::invalid_argument("Vertex does not exist in the graph.");
+            }
+
+            size_t remIdx = vertexToIndex[vert];
+            size_t lastIdx = numVertices - 1;
+
+            if (remIdx != lastIdx) {
+                for (size_t c = 0; c < numVertices; ++c) {
+                    std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
+                }
+                for (size_t r = 0; r < numVertices; ++r) {
+                    std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
+                }
+
+                VertexType movedVertex = indexToVertex[lastIdx];
+                vertexToIndex[movedVertex] = remIdx;
+                indexToVertex[remIdx] = movedVertex;
+            }
+
+            vertexToIndex.erase(vert);
+            indexToVertex.pop_back();
+
+            size_t newSize = (numVertices - 1) * (numVertices - 1);
+            std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
+
+            for (size_t r = 0; r < numVertices - 1; ++r) {
+                for (size_t c = 0; c < numVertices - 1; ++c) {
+                    newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
+                }
+            }
+
+            adjacencyMatrix = std::move(newMatrix);
+
+            --numVertices;
+        }
 
 
         // get the list of isolated vertices
