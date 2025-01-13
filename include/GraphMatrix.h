@@ -44,6 +44,7 @@ namespace Appledore
         EdgeType value;
 
         EdgeInfo(const EdgeType &value) : value(value) {}
+        EdgeInfo() {}
     };
 
     // GraphMatrix class template
@@ -206,7 +207,7 @@ namespace Appledore
             return edges;
         }
         // Get indegree for a vertex
-        [[nodiscard]] size_t indegree(const VertexType& vertex) const
+        [[nodiscard]] size_t indegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -229,7 +230,7 @@ namespace Appledore
             return indegree;
         }
         // Get outdegree for a vertex
-        [[nodiscard]] size_t outdegree(const VertexType& vertex) const
+        [[nodiscard]] size_t outdegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -252,7 +253,7 @@ namespace Appledore
             return outdegree;
         }
         // Get totalDegree for a vertex
-        [[nodiscard]] size_t totalDegree(const VertexType& vertex) const
+        [[nodiscard]] size_t totalDegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -272,7 +273,7 @@ namespace Appledore
             return totaldegree;
         }
         // Get neighbors for a vertex
-        std::set<VertexType> getNeighbors(const VertexType& vertex) const
+        std::set<VertexType> getNeighbors(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
             {
@@ -371,51 +372,108 @@ namespace Appledore
             return numerator / denominator;
         }
 
-        // ---------------------------------------------------------
-        // NEW METHOD: removeVertex() 
-        // ---------------------------------------------------------
-        void removeVertex(const VertexType &vert)
+        [[nodiscard]] bool isConnected() const
         {
-            if (!vertexToIndex.count(vert))
+            if (numVertices == 0)
+                return true;
+            if (isDirected)
+                return false;
+            std::vector<bool> visited(numVertices, false);
+            dfsforConnectivity(0, visited);
+            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+        }
+
+        void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
+        {
+            std::stack<size_t> stack;
+            stack.push(start);
+
+            while (!stack.empty())
             {
+                size_t current = stack.top();
+                stack.pop();
+
+                if (!visited[current])
+                {
+                    visited[current] = true;
+
+                    for (size_t dest = 0; dest < numVertices; ++dest)
+                    {
+                        if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
+                        {
+                            stack.push(dest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---------------------------------------------------------
+        // NEW METHOD: removeVertex()
+        // ---------------------------------------------------------
+        void removeVertex(const VertexType &vert) {
+
+            if (!vertexToIndex.count(vert)) {
                 throw std::invalid_argument("Vertex does not exist in the graph.");
             }
 
             size_t remIdx = vertexToIndex[vert];
             size_t lastIdx = numVertices - 1;
 
-            // Swap row/column of the vertex to be removed with the last vertex, if needed
-            if (remIdx != lastIdx)
-            {
-                for (size_t c = 0; c < numVertices; ++c)
-                {
-                    adjacencyMatrix[getIndex(remIdx, c)] =
-                        adjacencyMatrix[getIndex(lastIdx, c)];
+            if (remIdx != lastIdx) {
+                for (size_t c = 0; c < numVertices; ++c) {
+                    std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
                 }
-                for (size_t r = 0; r < numVertices; ++r)
-                {
-                    adjacencyMatrix[getIndex(r, remIdx)] =
-                        adjacencyMatrix[getIndex(r, lastIdx)];
+                for (size_t r = 0; r < numVertices; ++r) {
+                    std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
                 }
+
                 VertexType movedVertex = indexToVertex[lastIdx];
                 vertexToIndex[movedVertex] = remIdx;
                 indexToVertex[remIdx] = movedVertex;
             }
 
-            // Clear the last row/column
-            for (size_t i = 0; i < numVertices; ++i)
-            {
-                adjacencyMatrix[getIndex(i, lastIdx)] = std::nullopt;
-                adjacencyMatrix[getIndex(lastIdx, i)] = std::nullopt;
-            }
-
-            // Erase the vertex from data structures
             vertexToIndex.erase(vert);
             indexToVertex.pop_back();
-            numVertices--;
 
-            // Resize adjacencyMatrix
-            adjacencyMatrix.resize(numVertices * numVertices);
+            size_t newSize = (numVertices - 1) * (numVertices - 1);
+            std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
+
+            for (size_t r = 0; r < numVertices - 1; ++r) {
+                for (size_t c = 0; c < numVertices - 1; ++c) {
+                    newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
+                }
+            }
+
+            adjacencyMatrix = std::move(newMatrix);
+
+            --numVertices;
+        }
+
+        // get the list of isolated vertices
+        [[nodiscard]] std::vector<VertexType> getIsolated() const
+        {
+            if (numVertices == 0)
+            {
+                throw std::runtime_error("Graph is empty. No vertices available.");
+            }
+
+            std::vector<VertexType> isolatedVertices;
+
+            for (const auto &vertex : indexToVertex)
+            {
+                if (vertexToIndex.find(vertex) == vertexToIndex.end())
+                {
+                    throw std::invalid_argument("Vertex does not exist in the graph.");
+                }
+
+                if (totalDegree(vertex) == 0)
+                {
+                    isolatedVertices.push_back(vertex);
+                }
+            }
+
+            return isolatedVertices;
         }
 
     private:

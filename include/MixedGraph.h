@@ -36,6 +36,10 @@ namespace Appledore
         void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge, bool isDirected);
         void removeVertex(const VertexType &vert);
 
+        [[nodiscard]] size_t indegree(const VertexType &vertex) const;
+        [[nodiscard]] size_t outdegree(const VertexType &vertex) const;
+        [[nodiscard]] size_t totalDegree(const VertexType &vertex) const;
+
         const bool operator()(VertexType src, VertexType dest) const
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
@@ -216,7 +220,7 @@ namespace Appledore
         {
             for (size_t dest = 0; dest < numVertices; ++dest)
             {
-                size_t index = src * numVertices + dest; 
+                size_t index = src * numVertices + dest;
 
                 if (adjacencyMatrix[index].has_value())
                 {
@@ -268,11 +272,13 @@ namespace Appledore
 
         for (size_t i = 0; i <= numVertices; ++i)
         {
-            if (i == removeIndex) continue; 
+            if (i == removeIndex)
+                continue;
 
             for (size_t j = 0; j <= numVertices; ++j)
             {
-                if (j == removeIndex) continue; 
+                if (j == removeIndex)
+                    continue;
                 if (i < numVertices && j < numVertices)
                 {
                     size_t oldRow = (i < removeIndex) ? i : i + 1;
@@ -286,5 +292,86 @@ namespace Appledore
         adjacencyMatrix = std::move(newMatrix);
     }
     // ---------------------------------------------------
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::indegree(const VertexType &vertex) const
+    {
+        if (!vertexToIndex.count(vertex))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t vertexIndex = vertexToIndex.at(vertex);
+        size_t inDegreeCount = 0;
+
+        for (size_t src = 0; src < numVertices; ++src)
+        {
+            if (adjacencyMatrix[getIndex(src, vertexIndex)].has_value())
+            {
+                ++inDegreeCount;
+            }
+        }
+
+        return inDegreeCount;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::outdegree(const VertexType &vertex) const
+    {
+        if (!vertexToIndex.count(vertex))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t vertexIndex = vertexToIndex.at(vertex);
+        size_t outDegreeCount = 0;
+
+        for (size_t dest = 0; dest < numVertices; ++dest)
+        {
+            if (adjacencyMatrix[getIndex(vertexIndex, dest)].has_value())
+            {
+                ++outDegreeCount;
+            }
+        }
+
+        return outDegreeCount;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::totalDegree(const VertexType &vertex) const
+    {
+        if (!vertexToIndex.count(vertex))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t vertexIndex = vertexToIndex.at(vertex);
+        size_t totalDegreeCount = 0;
+
+        for (size_t other = 0; other < numVertices; ++other)
+        {
+            auto forwardIndex = getIndex(vertexIndex, other);
+            auto backwardIndex = getIndex(other, vertexIndex);
+
+            if (adjacencyMatrix[forwardIndex].has_value())
+            {
+                if (adjacencyMatrix[forwardIndex]->isDirected)
+                {
+                    ++totalDegreeCount;
+                }
+                else
+                {
+                    ++totalDegreeCount;
+                }
+            }
+
+            if (adjacencyMatrix[backwardIndex].has_value() &&
+                adjacencyMatrix[backwardIndex]->isDirected)
+            {
+                ++totalDegreeCount;
+            }
+        }
+
+        return totalDegreeCount;
+    }
 
 };
