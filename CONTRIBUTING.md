@@ -26,21 +26,25 @@ Welcome to Appledore, a graph library designed to simplify graph representation 
     - Maintain regular activity on your assigned tasks. If no updates are provided on an issue or pull request (PR) for more than 3 days, it will be marked as stale.
 
 ## Issue Management:
-3. **Inactive Issues**:
+3. **Issue Assignment**: 
+    - If you are already assigned to one of the issues, you must get its corresponding pull request at least **approved** regardless if its merged or not. If your PR is at least approved only then you can start working on a new issue and get it assigned to you.
+4. **Inactive Issues**:
     - Issues that remain inactive for **3 days** after assignment will be marked as stale and **12 hours** after being marked as stale the issue will be reassigned to another contributor to ensure timely resolution.
-4. **Request for Extensions**:
+5. **Request for Extensions**:
     - If you need more time to work on an issue, notify the maintainer before the issue is marked stale to avoid reassignment.
 ## Pull Request (PR) Management:
-5. **Inactive Pull Requests**:
+6. **Latest Changes**: 
+    - If you opened a PR, make sure it is in **sync** with the latest changes from **main** branch of the repository. Make sure to timely run ``git pull`` on your forks and branches to pull latest changes from the main repository. Otherwise it will be difficult for maintainer(s) to **test** your fix or feature if your code is multiple commits behind the main branch. 
+7. **Inactive Pull Requests**:
     - PRs that remain inactive for **3 days** will be marked as stale, and after **12 hours**, they will be closed if no further activity occurs. The corresponding issue will also be unassigned from the contributor.
-6. **Quality of PRs**:
+8. **Quality of PRs**:
     - Ensure that your PRs ahdere to project's coding standards and include necessary, documentation, test cases, and meaningful commit messages.
 ## Additional Notes:
-7. **Open Discussions**:
+9. **Open Discussions**:
     - Before starting work on significant issues or features, discuss your approach with the maintainers to ensure alignment and avoid duplication of efforts.
-8. **Communication is Key**:
+10. **Communication is Key**:
     - Use the project’s communication channels (e.g. Discord, or GitHub Discussions) to ask questions, seek clarification, or discuss ideas related to your assigned tasks.
-9. **Peer Reviews**:
+11. **Peer Reviews**:
     - Actively participate in reviewing other contributors’ PRs when possible. Constructive feedback strengthens the project and fosters collaboration.
 
 ## Documentation and Examples
