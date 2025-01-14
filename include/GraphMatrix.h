@@ -384,8 +384,13 @@ namespace Appledore
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
                 throw std::invalid_argument("One or both vertices do not exist");
-            
+
+            //  Fixing the previous issue, i.e. Stack for DFS: stores the current vertex and the path taken so far
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
+
+            // Start DFS from the source vertex
+            stack.push({src, {src}});
+
             size_t pathCount = 0;
 
             while (!stack.empty())
@@ -395,6 +400,7 @@ namespace Appledore
 
                 if (current == dest)
                 {
+                    // Found a valid path to the destination
                     pathCount++;
                 }
                 else
@@ -402,9 +408,11 @@ namespace Appledore
                     size_t currentIndex = vertexToIndex[current];
                     for (size_t i = 0; i < numVertices; ++i)
                     {
+                        // Check if there's an edge from the current vertex to the next vertex
                         if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
                         {
                             VertexType nextVertex = indexToVertex[i];
+                            // Preventing cycles by avoiding revisiting vertices in the current path
                             if (std::find(currentPath.begin(), currentPath.end(), nextVertex) == currentPath.end())
                             {
                                 auto newPath = currentPath;
@@ -415,7 +423,7 @@ namespace Appledore
                     }
                 }
             }
-            
+
             return pathCount;
         }
 
