@@ -402,14 +402,17 @@ namespace Appledore
             std::stack<size_t> stack;
             stack.push(start);
 
+
             while (!stack.empty())
             {
                 size_t current = stack.top();
                 stack.pop();
 
+
                 if (!visited[current])
                 {
                     visited[current] = true;
+
 
                     for (size_t dest = 0; dest < numVertices; ++dest)
                     {
