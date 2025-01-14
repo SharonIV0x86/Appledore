@@ -372,6 +372,36 @@ namespace Appledore
             return isolatedVertices;
         }
 
+        // Function to update an edge in the GraphMatrix
+        void updateEdge(const VertexType &src, const VertexType &dest, const EdgeType &newEdgeValue)
+        {
+            if (!isWeighted)
+            {
+                throw std::logic_error("Cannot update an edge in an unweighted graph.");
+            }
+
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+            {
+                throw std::invalid_argument("One or both vertices do not exist.");
+            }
+
+            size_t srcIndex = vertexToIndex.at(src);
+            size_t destIndex = vertexToIndex.at(dest);
+
+            auto &edgeInfo = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+            if (!edgeInfo.has_value())
+            {
+                throw std::runtime_error("No edge exists between the specified vertices.");
+            }
+
+            edgeInfo = EdgeInfo<EdgeType>(newEdgeValue);
+
+            if (!isDirected)
+            {
+                adjacencyMatrix[getIndex(destIndex, srcIndex)] = EdgeInfo<EdgeType>(newEdgeValue);
+            }
+        }
+
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;
