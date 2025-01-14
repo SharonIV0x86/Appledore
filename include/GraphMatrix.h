@@ -363,6 +363,30 @@ namespace Appledore
             return allPaths;
         }
 
+        // Calculate the density of the graph
+        // For undirected graphs: density = (2 * |E|) / (|V| * (|V| - 1))
+        // For directed graphs: density = |E| / (|V| * (|V| - 1))
+        [[nodiscard]] double density() const {
+            if (numVertices <= 1) {
+                return 0.0;
+            }
+
+            size_t edgeCount = 0;
+            for (size_t i = 0; i < adjacencyMatrix.size(); ++i) {
+                if (adjacencyMatrix[i].has_value()) {
+                    edgeCount++;
+                }
+            }
+
+            if (!isDirected) {
+                edgeCount /= 2;
+            }
+
+            double denominator = static_cast<double>(numVertices) * (numVertices - 1);
+            double numerator = isDirected ? static_cast<double>(edgeCount) : 2.0 * static_cast<double>(edgeCount);
+
+            return numerator / denominator;
+        }
 
         [[nodiscard]] bool isConnected() const
         {
@@ -374,7 +398,6 @@ namespace Appledore
             dfsforConnectivity(0, visited);
             return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
         }
-
 
         // ---------------------------------------------------------
         // NEW METHOD: countPathsDFS()
@@ -436,16 +459,16 @@ namespace Appledore
         {
             std::stack<size_t> stack;
             stack.push(start);
-        
+
             while (!stack.empty())
             {
                 size_t current = stack.top();
                 stack.pop();
-        
+
                 if (!visited[current])
                 {
                     visited[current] = true;
-        
+
                     for (size_t dest = 0; dest < numVertices; ++dest)
                     {
                         if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
@@ -457,9 +480,10 @@ namespace Appledore
             }
         }
 
-
-
-         void removeVertex(const VertexType &vert) {
+        // ---------------------------------------------------------
+        // NEW METHOD: removeVertex()
+        // ---------------------------------------------------------
+        void removeVertex(const VertexType &vert) {
 
             if (!vertexToIndex.count(vert)) {
                 throw std::invalid_argument("Vertex does not exist in the graph.");
@@ -498,7 +522,6 @@ namespace Appledore
             --numVertices;
         }
 
-
         // get the list of isolated vertices
         [[nodiscard]] std::vector<VertexType> getIsolated() const
         {
@@ -523,6 +546,36 @@ namespace Appledore
             }
 
             return isolatedVertices;
+        }
+
+        // Function to update an edge in the GraphMatrix
+        void updateEdge(const VertexType &src, const VertexType &dest, const EdgeType &newEdgeValue)
+        {
+            if (!isWeighted)
+            {
+                throw std::logic_error("Cannot update an edge in an unweighted graph.");
+            }
+
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+            {
+                throw std::invalid_argument("One or both vertices do not exist.");
+            }
+
+            size_t srcIndex = vertexToIndex.at(src);
+            size_t destIndex = vertexToIndex.at(dest);
+
+            std::optional<EdgeInfo<EdgeType>> edgeInfo = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+            if (!edgeInfo.has_value())
+            {
+                throw std::runtime_error("No edge exists between the specified vertices.");
+            }
+
+            edgeInfo = EdgeInfo<EdgeType>(newEdgeValue);
+
+            if (!isDirected)
+            {
+                adjacencyMatrix[getIndex(destIndex, srcIndex)] = EdgeInfo<EdgeType>(newEdgeValue);
+            }
         }
 
     private:
