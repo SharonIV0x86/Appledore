@@ -22,7 +22,7 @@ namespace Appledore {
     }
 
     template<typename T>
-    std::enable_if_t<std::is_fundamental<T>::value || is_streamable<T>::value && std::is_fundamental<T>::value, std::string>
+    std::enable_if_t<std::is_fundamental<T>::value || (is_streamable<T>::value && std::is_fundamental<T>::value), std::string>
     toString(const T& value) {
         std::ostringstream ss;
         ss << value;
