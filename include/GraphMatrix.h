@@ -8,44 +8,54 @@
 #include <stack>
 #include <algorithm>
 #include <set>
-
+#include "MatrixRep.h"
 namespace Appledore
 {
     // Tag structures
-    struct DirectedG
-    {
-    };
-    struct UndirectedG
-    {
-    };
-    struct UnweightedG
-    {
-    };
-    class GraphVertex
-    {
-    public:
-        size_t id;
+    // struct DirectedG
+    // {
+    // };
+    // struct UndirectedG
+    // {
+    // };
+    // struct UnweightedG
+    // {
+    // };
+    // class GraphVertex
+    // {
+    // public:
+    //     size_t id;
 
-        static size_t nextId;
+    //     static size_t nextId;
 
-        GraphVertex()
-        {
-            id = nextId++;
-        }
-        bool operator<(const GraphVertex &other) const
-        {
-            return id < other.id;
-        }
-    };
-    size_t Appledore::GraphVertex::nextId = 1;
+    //     GraphVertex()
+    //     {
+    //         id = nextId++;
+    //     }
+    //     bool operator<(const GraphVertex &other) const
+    //     {
+    //         return id < other.id;
+    //     }
+    // };
+    // size_t Appledore::GraphVertex::nextId = 1;
     template <typename EdgeType>
     struct EdgeInfo
     {
         EdgeType value;
+        bool isDirected;
 
-        EdgeInfo(const EdgeType &value) : value(value) {}
-        EdgeInfo() {}
+        EdgeInfo() : value(), isDirected(false) {}
+        EdgeInfo(const EdgeType &value, bool isDirected = false)
+            : value(value), isDirected(isDirected) {}
     };
+
+    // struct EdgeInfo
+    // {
+    //     EdgeType value;
+
+    //     EdgeInfo(const EdgeType &value) : value(value) {}
+    //     EdgeInfo() {}
+    // };
 
     // GraphMatrix class template
     template <typename VertexType, typename EdgeType, typename Direction>
@@ -354,24 +364,24 @@ namespace Appledore
                 return false;
             std::vector<bool> visited(numVertices, false);
             dfsforConnectivity(0, visited);
-            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+            return std::all_of(visited.begin(), visited.end(), [](bool v)
+                               { return v; });
         }
-
 
         void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
         {
             std::stack<size_t> stack;
             stack.push(start);
-        
+
             while (!stack.empty())
             {
                 size_t current = stack.top();
                 stack.pop();
-        
+
                 if (!visited[current])
                 {
                     visited[current] = true;
-        
+
                     for (size_t dest = 0; dest < numVertices; ++dest)
                     {
                         if (adjacencyMatrix[getIndex(current, dest)].has_value() && !visited[dest])
@@ -383,22 +393,25 @@ namespace Appledore
             }
         }
 
+        void removeVertex(const VertexType &vert)
+        {
 
-
-         void removeVertex(const VertexType &vert) {
-
-            if (!vertexToIndex.count(vert)) {
+            if (!vertexToIndex.count(vert))
+            {
                 throw std::invalid_argument("Vertex does not exist in the graph.");
             }
 
             size_t remIdx = vertexToIndex[vert];
             size_t lastIdx = numVertices - 1;
 
-            if (remIdx != lastIdx) {
-                for (size_t c = 0; c < numVertices; ++c) {
+            if (remIdx != lastIdx)
+            {
+                for (size_t c = 0; c < numVertices; ++c)
+                {
                     std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
                 }
-                for (size_t r = 0; r < numVertices; ++r) {
+                for (size_t r = 0; r < numVertices; ++r)
+                {
                     std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
                 }
 
@@ -413,8 +426,10 @@ namespace Appledore
             size_t newSize = (numVertices - 1) * (numVertices - 1);
             std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
 
-            for (size_t r = 0; r < numVertices - 1; ++r) {
-                for (size_t c = 0; c < numVertices - 1; ++c) {
+            for (size_t r = 0; r < numVertices - 1; ++r)
+            {
+                for (size_t c = 0; c < numVertices - 1; ++c)
+                {
                     newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
                 }
             }
@@ -423,7 +438,6 @@ namespace Appledore
 
             --numVertices;
         }
-
 
         // get the list of isolated vertices
         [[nodiscard]] std::vector<VertexType> getIsolated() const

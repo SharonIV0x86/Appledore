@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <optional>
 #include <map>
+#include "MatrixRep.h"
 
 namespace Appledore
 {
