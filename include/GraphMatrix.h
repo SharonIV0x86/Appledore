@@ -388,7 +388,7 @@ namespace Appledore
             size_t srcIndex = vertexToIndex.at(src);
             size_t destIndex = vertexToIndex.at(dest);
 
-            auto &edgeInfo = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+            std::optional<EdgeInfo<EdgeType>> edgeInfo = adjacencyMatrix[getIndex(srcIndex, destIndex)];
             if (!edgeInfo.has_value())
             {
                 throw std::runtime_error("No edge exists between the specified vertices.");
