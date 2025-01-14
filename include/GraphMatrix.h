@@ -356,6 +356,35 @@ namespace Appledore
 
             return allPaths;
         }
+        // Calculate the density of the graph
+        // For undirected graphs: density = (2 * |E|) / (|V| * (|V| - 1))
+        // For directed graphs: density = |E| / (|V| * (|V| - 1))
+        [[nodiscard]] double density() const
+        {
+            if (numVertices <= 1)
+            {
+                return 0.0;
+            }
+
+            size_t edgeCount = 0;
+            for (size_t i = 0; i < adjacencyMatrix.size(); ++i)
+            {
+                if (adjacencyMatrix[i].has_value())
+                {
+                    edgeCount++;
+                }
+            }
+
+            if (!isDirected)
+            {
+                edgeCount /= 2;
+            }
+
+            double denominator = static_cast<double>(numVertices) * (numVertices - 1);
+            double numerator = isDirected ? static_cast<double>(edgeCount) : 2.0 * static_cast<double>(edgeCount);
+
+            return numerator / denominator;
+        }
         [[nodiscard]] bool isConnected() const
         {
             if (numVertices == 0)
