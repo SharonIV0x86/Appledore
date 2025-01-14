@@ -310,13 +310,15 @@ namespace Appledore
                 throw std::invalid_argument("One or both vertices do not exist");
 
             if (pl < 0)
-                throw std :: invalid_argument("Path limit must be a non-negative integer!\n"); 
-                
-            // Compute the total number of paths using DFS
-            size_t totalPaths = countPathsDFS(src, dest);
-            
-            if (pl > 0 && pl > totalPaths)
-                throw std::invalid_argument("Path limit exceeds the total number of possible paths");
+                throw std::invalid_argument("Path limit must be a non-negative integer!");
+
+            // Compute the total number of paths only if the user specified a limit, this optimizes the performance.
+            if (pl > 0)
+            {
+                size_t totalPaths = countPathsDFS(src, dest);
+                if (pl > totalPaths)
+                    throw std::invalid_argument("Path limit exceeds the total number of possible paths");
+            }
 
             std::vector<std::vector<VertexType>> allPaths;
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
@@ -328,21 +330,20 @@ namespace Appledore
             {
                 auto [current, currentPath] = stack.top();
                 stack.pop();
-                visited[current] = true;
 
                 if (current == dest)
                 {
                     allPaths.push_back(currentPath);
 
-                    // To check if the path limit has been reached
-                    if (allPaths.size() >= pl && pl > 0)
+                    // Check if the path limit has been reached
+                    if (pl > 0 && allPaths.size() >= pl)
                     {
                         break;
                     }
                 }
                 else
                 {
-                    size_t currentIndex = vertexToIndex[current];
+                    size_t currentIndex = vertexToIndex.at(current);
                     for (size_t i = 0; i < numVertices; ++i)
                     {
                         if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
@@ -357,11 +358,12 @@ namespace Appledore
                         }
                     }
                 }
-                visited[current] = false;
             }
 
             return allPaths;
         }
+
+
         [[nodiscard]] bool isConnected() const
         {
             if (numVertices == 0)
