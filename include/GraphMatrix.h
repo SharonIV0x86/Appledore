@@ -11,33 +11,7 @@
 #include "MatrixRep.h"
 namespace Appledore
 {
-    // Tag structures
-    // struct DirectedG
-    // {
-    // };
-    // struct UndirectedG
-    // {
-    // };
-    // struct UnweightedG
-    // {
-    // };
-    // class GraphVertex
-    // {
-    // public:
-    //     size_t id;
-
-    //     static size_t nextId;
-
-    //     GraphVertex()
-    //     {
-    //         id = nextId++;
-    //     }
-    //     bool operator<(const GraphVertex &other) const
-    //     {
-    //         return id < other.id;
-    //     }
-    // };
-    // size_t Appledore::GraphVertex::nextId = 1;
+    
     template <typename EdgeType>
     struct EdgeInfo
     {
