@@ -329,7 +329,6 @@ namespace Appledore
 
             std::vector<std::vector<VertexType>> allPaths;
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
-            std::map<VertexType, bool> visited;
 
             stack.push({src, {src}});
 
