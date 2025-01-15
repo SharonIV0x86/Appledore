@@ -14,10 +14,6 @@ public:
         os << "Vertex " << v.id;
         return os;
     }
-
-    bool operator<(const TestVertex &other) const {
-        return id < other.id;
-    }
 };
 
 void printEdges(const auto& edges, const std::string& description) {
