@@ -1,4 +1,4 @@
-    #pragma once
+#pragma once
 
     #include <vector>
     #include <iostream>
@@ -21,6 +21,7 @@
         struct UnweightedG
         {
         };
+
         class GraphVertex
         {
         public:
@@ -73,7 +74,7 @@
                 adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
             }
 
-            bool operator()(const VertexType src, const VertexType &dest)
+            bool operator()(const VertexType &src, const VertexType &dest)
             {
                 if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
                 {
@@ -331,7 +332,7 @@
                     auto [current, currentPath] = stack.top();
                     stack.pop();
 
-                    if (current == dest)
+                    if (current.id == dest.id)
                     {
                         allPaths.push_back(currentPath);
 
