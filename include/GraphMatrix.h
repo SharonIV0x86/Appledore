@@ -1,26 +1,27 @@
-    #pragma once
+#pragma once
 
-    #include <vector>
-    #include <iostream>
-    #include <stdexcept>
-    #include <optional>
-    #include <map>
-    #include <stack>
-    #include <algorithm>
-    #include <set>
-
-    namespace Appledore
+#include <vector>
+#include <iostream>
+#include <stdexcept>
+#include <optional>
+#include <map>
+#include <stack>
+#include <algorithm>
+#include <set>
+#include "MatrixRep.h"
+namespace Appledore
+{
+  // Tag structures
+    struct DirectedG
     {
-        // Tag structures
-        struct DirectedG
-        {
-        };
-        struct UndirectedG
-        {
-        };
-        struct UnweightedG
-        {
-        };
+    };
+    struct UndirectedG
+    {
+    };
+    struct UnweightedG
+    {
+    };
+  
         class GraphVertex
         {
         public:
@@ -37,6 +38,7 @@
                 return id < other.id;
             }
         };
+        
         size_t Appledore::GraphVertex::nextId = 1;
         template <typename EdgeType>
         struct EdgeInfo
