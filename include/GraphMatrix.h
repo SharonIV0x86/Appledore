@@ -21,7 +21,6 @@
         struct UnweightedG
         {
         };
-
         class GraphVertex
         {
         public:
@@ -38,6 +37,7 @@
                 return id < other.id;
             }
         };
+        
         size_t Appledore::GraphVertex::nextId = 1;
         template <typename EdgeType>
         struct EdgeInfo
