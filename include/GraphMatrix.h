@@ -418,8 +418,11 @@ namespace Appledore
 
             while (!stack.empty())
             {
-                auto [current, currentPath] = stack.top();
+                std::pair<VertexType, std::vector<VertexType>> currentElement = stack.top();
                 stack.pop();
+
+                VertexType current = currentElement.first;
+                std::vector<VertexType> currentPath = currentElement.second;
 
                 if (current == dest)
                 {
