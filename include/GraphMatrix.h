@@ -477,11 +477,6 @@ namespace Appledore
             return pathCount;
         }
 
-        // ---------------------------------------------------------
-        // NEW METHOD: removeVertex() 
-        // ---------------------------------------------------------
-        void removeVertex(const VertexType &vert)
-
         void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
         {
             std::stack<size_t> stack;
