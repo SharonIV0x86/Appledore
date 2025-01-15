@@ -17,10 +17,6 @@ public:
         return os;
     }
 
-    bool operator==(const Airport &other) const
-    {
-        return name == other.name;
-    }
 };
 
 class Flight
