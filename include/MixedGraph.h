@@ -19,7 +19,7 @@ namespace Appledore
             : value(value), isDirected(isDirected) {}
     };
     template <typename VertexType, typename EdgeType = bool>
-    class MixedGraphMatrix
+    class MixedGraphMatrix : public Appledore::MixedGraphMatrix
     {
     public:
         void addVertex(const VertexType &vertex);
