@@ -102,6 +102,5 @@ int main()
         }
         std::cout << "END\n";
     }
-
     return 0;
 }

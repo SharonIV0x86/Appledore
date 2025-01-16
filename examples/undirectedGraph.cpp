@@ -123,6 +123,5 @@ int main()
 
     std::cout << "NO. of flights starting from " << LAX <<" : " << GraphAirports.outdegree(LAX) << "\n";//Will give out error warnings as Undirected Graphs don't have Indegree or Outdegree.
     std::cout << "NO. of flights ending at " << LAX <<" : " << GraphAirports.indegree(LAX) << "\n";//Gives out total degree instead
-
     return 0;
 }
