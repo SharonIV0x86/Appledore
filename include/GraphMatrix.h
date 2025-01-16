@@ -35,15 +35,31 @@ namespace Appledore
             auto add_single_vertex = [this](const VertexType &vertex)
             {
                 if (vertexToIndex.count(vertex))
-                    return;
+                    return; // Vertex already exists
+
                 size_t newIndex = numVertices++;
                 vertexToIndex[vertex] = newIndex;
                 indexToVertex.push_back(vertex);
+
+                // Resize and initialize the adjacency matrix
+                size_t newSize = numVertices;
+                std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize * newSize, std::nullopt);
+
+                // Copy old matrix values into the new matrix
+                for (size_t i = 0; i < newSize - 1; ++i)
+                {
+                    for (size_t j = 0; j < newSize - 1; ++j)
+                    {
+                        newMatrix[i * newSize + j] = adjacencyMatrix[i * (newSize - 1) + j];
+                    }
+                }
+
+                // Update the adjacency matrix
+                adjacencyMatrix = std::move(newMatrix);
             };
 
+            // Add each vertex provided in the variadic arguments
             (add_single_vertex(std::forward<Vertices>(vertices)), ...);
-
-            adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
         }
 
         bool operator()(const VertexType src, const VertexType &dest)
@@ -323,19 +339,24 @@ namespace Appledore
         // Calculate the density of the graph
         // For undirected graphs: density = (2 * |E|) / (|V| * (|V| - 1))
         // For directed graphs: density = |E| / (|V| * (|V| - 1))
-        [[nodiscard]] double density() const {
-            if (numVertices <= 1) {
+        [[nodiscard]] double density() const
+        {
+            if (numVertices <= 1)
+            {
                 return 0.0;
             }
 
             size_t edgeCount = 0;
-            for (size_t i = 0; i < adjacencyMatrix.size(); ++i) {
-                if (adjacencyMatrix[i].has_value()) {
+            for (size_t i = 0; i < adjacencyMatrix.size(); ++i)
+            {
+                if (adjacencyMatrix[i].has_value())
+                {
                     edgeCount++;
                 }
             }
 
-            if (!isDirected) {
+            if (!isDirected)
+            {
                 edgeCount /= 2;
             }
 
@@ -353,7 +374,8 @@ namespace Appledore
                 return false;
             std::vector<bool> visited(numVertices, false);
             dfsforConnectivity(0, visited);
-            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+            return std::all_of(visited.begin(), visited.end(), [](bool v)
+                               { return v; });
         }
 
         void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
@@ -384,20 +406,25 @@ namespace Appledore
         // ---------------------------------------------------------
         // NEW METHOD: removeVertex()
         // ---------------------------------------------------------
-        void removeVertex(const VertexType &vert) {
+        void removeVertex(const VertexType &vert)
+        {
 
-            if (!vertexToIndex.count(vert)) {
+            if (!vertexToIndex.count(vert))
+            {
                 throw std::invalid_argument("Vertex does not exist in the graph.");
             }
 
             size_t remIdx = vertexToIndex[vert];
             size_t lastIdx = numVertices - 1;
 
-            if (remIdx != lastIdx) {
-                for (size_t c = 0; c < numVertices; ++c) {
+            if (remIdx != lastIdx)
+            {
+                for (size_t c = 0; c < numVertices; ++c)
+                {
                     std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
                 }
-                for (size_t r = 0; r < numVertices; ++r) {
+                for (size_t r = 0; r < numVertices; ++r)
+                {
                     std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
                 }
 
@@ -412,8 +439,10 @@ namespace Appledore
             size_t newSize = (numVertices - 1) * (numVertices - 1);
             std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
 
-            for (size_t r = 0; r < numVertices - 1; ++r) {
-                for (size_t c = 0; c < numVertices - 1; ++c) {
+            for (size_t r = 0; r < numVertices - 1; ++r)
+            {
+                for (size_t c = 0; c < numVertices - 1; ++c)
+                {
                     newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
                 }
             }
@@ -476,6 +505,35 @@ namespace Appledore
             if (!isDirected)
             {
                 adjacencyMatrix[getIndex(destIndex, srcIndex)] = EdgeInfo<EdgeType>(newEdgeValue);
+            }
+        }
+        void __show_states()
+        {
+            std::cout << "State of Index to index: ";
+            for (size_t i = 0; i < indexToVertex.size(); ++i)
+            {
+                std::cout << indexToVertex[i] << " ";
+            }
+            std::cout << "\nState of Vertex to index: \n";
+            for (const auto &[first, second] : vertexToIndex)
+            {
+                std::cout << first << " -> " << second << "\n";
+            }
+            std::cout << "\n Adjacency Matrix: \n";
+            for (size_t i = 0; i < numVertices; ++i)
+            {
+                for (size_t j = 0; j < numVertices; ++j)
+                {
+                    if (adjacencyMatrix[getIndex(i, j)].has_value())
+                    {
+                        std::cout << " 1 ";
+                    }
+                    else
+                    {
+                        std::cout << " 0 ";
+                    }
+                }
+                std::cout << "\n";
             }
         }
 
