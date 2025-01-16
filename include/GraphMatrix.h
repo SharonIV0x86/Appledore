@@ -35,17 +35,14 @@ namespace Appledore
             auto add_single_vertex = [this](const VertexType &vertex)
             {
                 if (vertexToIndex.count(vertex))
-                    return; // Vertex already exists
+                    return; 
 
                 size_t newIndex = numVertices++;
                 vertexToIndex[vertex] = newIndex;
                 indexToVertex.push_back(vertex);
-
-                // Resize and initialize the adjacency matrix
                 size_t newSize = numVertices;
                 std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize * newSize, std::nullopt);
 
-                // Copy old matrix values into the new matrix
                 for (size_t i = 0; i < newSize - 1; ++i)
                 {
                     for (size_t j = 0; j < newSize - 1; ++j)
@@ -54,11 +51,9 @@ namespace Appledore
                     }
                 }
 
-                // Update the adjacency matrix
                 adjacencyMatrix = std::move(newMatrix);
             };
 
-            // Add each vertex provided in the variadic arguments
             (add_single_vertex(std::forward<Vertices>(vertices)), ...);
         }
 
