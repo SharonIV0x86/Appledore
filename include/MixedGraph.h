@@ -250,42 +250,30 @@ namespace Appledore
         }
 
         size_t removeIndex = vertexToIndex[vert];
-
-        // Step 1: Remove entry from map and the corresponding entry in indexToVertex
         vertexToIndex.erase(vert);
-
-        // Step 2: We will re-map the last vertex in `indexToVertex` to fill the gap
+        
+        // If the vertex is not the last one, move the last vertex to this position
         if (removeIndex != numVertices - 1)
         {
-            VertexType lastVertex = indexToVertex[numVertices - 1];
-
+            VertexType lastVertex = indexToVertex.back();
             indexToVertex[removeIndex] = lastVertex;
-
             vertexToIndex[lastVertex] = removeIndex;
         }
 
         indexToVertex.pop_back();
-        --numVertices;
+        numVertices--;
 
-        // Step 3: Rebuild the adjacencyMatrix to remove the row and column of `removeIndex`
+        // Build the new adjacency matrix
         std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(numVertices * numVertices, std::nullopt);
-
-        for (size_t i = 0; i <= numVertices; ++i)
+        for (size_t i = 0; i < numVertices + 1; ++i)
         {
-            if (i == removeIndex)
-                continue;
-
-            for (size_t j = 0; j <= numVertices; ++j)
+            if (i == removeIndex) continue;
+            for (size_t j = 0; j < numVertices + 1; ++j)
             {
-                if (j == removeIndex)
-                    continue;
-                if (i < numVertices && j < numVertices)
-                {
-                    size_t oldRow = (i < removeIndex) ? i : i + 1;
-                    size_t oldCol = (j < removeIndex) ? j : j + 1;
-
-                    newMatrix[i * numVertices + j] = adjacencyMatrix[oldRow * (numVertices + 1) + oldCol];
-                }
+                if (j == removeIndex) continue;
+                size_t newRow = (i < removeIndex) ? i : i - 1;
+                size_t newCol = (j < removeIndex) ? j : j - 1;
+                newMatrix[newRow * numVertices + newCol] = adjacencyMatrix[i * (numVertices + 1) + j];
             }
         }
 
