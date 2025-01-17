@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <optional>
 #include <map>
-
+#include "MatrixRep.h"
 namespace Appledore
 {
     template <typename EdgeType>
@@ -19,7 +19,7 @@ namespace Appledore
             : value(value), isDirected(isDirected) {}
     };
     template <typename VertexType, typename EdgeType = bool>
-    class MixedGraphMatrix : public Appledore::MixedGraphMatrix
+    class MixedGraphMatrix : public Appledore::MatrixRepresentation
     {
     public:
         void addVertex(const VertexType &vertex);
