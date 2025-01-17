@@ -8,9 +8,43 @@
 #include <stack>
 #include <algorithm>
 #include <set>
-#include "MatrixRep.h"
+
 namespace Appledore
 {
+    // Tag structures
+    struct DirectedG
+    {
+    };
+    struct UndirectedG
+    {
+    };
+    struct UnweightedG
+    {
+    };
+    class GraphVertex
+    {
+    public:
+        size_t id;
+        static size_t nextId;
+
+        GraphVertex()
+        {
+            id = nextId++;
+        }
+
+        bool operator<(const GraphVertex &other) const
+        {
+            return id < other.id;
+        }
+
+        bool operator==(const GraphVertex &other) const
+        {
+            return id == other.id;
+        }
+    };
+    
+    size_t Appledore::GraphVertex::nextId = 1;
+    
     template <typename EdgeType>
     struct EdgeInfo
     {
@@ -22,12 +56,12 @@ namespace Appledore
 
     // GraphMatrix class template
     template <typename VertexType, typename EdgeType, typename Direction>
-    class GraphMatrix : Appledore::MatrixRepresentation
+    class GraphMatrix
     {
     public:
         GraphMatrix()
             : isDirected(std::is_same_v<Direction, DirectedG>),
-              isWeighted(!std::is_same_v<EdgeType, UnweightedG>) {}
+            isWeighted(!std::is_same_v<EdgeType, UnweightedG>) {}
 
         template <typename... Vertices>
         void addVertex(Vertices &&...vertices)
@@ -46,7 +80,7 @@ namespace Appledore
             adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
         }
 
-        bool operator()(const VertexType src, const VertexType &dest)
+        bool operator()(const VertexType &src, const VertexType &dest)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
             {
@@ -276,36 +310,63 @@ namespace Appledore
         }
 
         // find all paths b/w two vertices
-        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest)
+        // Modifying the findAllPaths method, adding the pathLimit parameter
+        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest, size_t pl = 0)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
                 throw std::invalid_argument("One or both vertices do not exist");
 
+            if (pl < 0)
+                throw std::invalid_argument("Path limit must be a non-negative integer!");
+
+            // Compute the total number of paths only if the user specified a limit, this optimizes the performance.
+            if (pl > 0)
+            {
+                size_t totalPaths = countPathsDFS(src, dest);
+                if (pl > totalPaths)
+                    throw std::invalid_argument("Path limit exceeds the total number of possible paths");
+            }
+
             std::vector<std::vector<VertexType>> allPaths;
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
-            std::map<VertexType, bool> visited;
 
             stack.push({src, {src}});
 
             while (!stack.empty())
             {
-                auto [current, currentPath] = stack.top();
+                std::pair<VertexType, std::vector<VertexType>> currentElement = stack.top();
                 stack.pop();
-                visited[current] = true;
+
+                VertexType current = currentElement.first;
+                std::vector<VertexType> currentPath = currentElement.second;
 
                 if (current == dest)
                 {
                     allPaths.push_back(currentPath);
+
+                    // Check if the path limit has been reached
+                    if (pl > 0 && allPaths.size() >= pl)
+                    {
+                        break;
+                    }
                 }
                 else
                 {
-                    size_t currentIndex = vertexToIndex[current];
+                    size_t currentIndex = vertexToIndex.at(current);
                     for (size_t i = 0; i < numVertices; ++i)
                     {
                         if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
                         {
                             VertexType nextVertex = indexToVertex[i];
-                            if (std::find(currentPath.begin(), currentPath.end(), nextVertex) == currentPath.end())
+                            bool vertexInPath = false;
+                            for (const auto& pathVertex : currentPath) {
+                                if (pathVertex.id == nextVertex.id) {
+                                    vertexInPath = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!vertexInPath)
                             {
                                 auto newPath = currentPath;
                                 newPath.push_back(nextVertex);
@@ -314,7 +375,6 @@ namespace Appledore
                         }
                     }
                 }
-                visited[current] = false;
             }
 
             return allPaths;
@@ -354,6 +414,67 @@ namespace Appledore
             std::vector<bool> visited(numVertices, false);
             dfsforConnectivity(0, visited);
             return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+        }
+
+        // ---------------------------------------------------------
+        // NEW METHOD: countPathsDFS()
+        // Helper Function to count the number of total paths between two vertices using DFS
+        // ---------------------------------------------------------
+        size_t countPathsDFS(const VertexType &src, const VertexType &dest)
+        {
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+                throw std::invalid_argument("One or both vertices do not exist");
+
+            //  Fixing the previous issue, i.e. Stack for DFS: stores the current vertex and the path taken so far
+            std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
+
+            // Start DFS from the source vertex
+            stack.push({src, {src}});
+
+            size_t pathCount = 0;
+
+            while (!stack.empty())
+            {
+                std::pair<VertexType, std::vector<VertexType>> currentElement = stack.top();
+                stack.pop();
+
+                VertexType current = currentElement.first;
+                std::vector<VertexType> currentPath = currentElement.second;
+
+                if (current == dest)
+                {
+                    // Found a valid path to the destination
+                    pathCount++;
+                }
+                else
+                {
+                    size_t currentIndex = vertexToIndex[current];
+                    for (size_t i = 0; i < numVertices; ++i)
+                    {
+                        // Check if there's an edge from the current vertex to the next vertex
+                        if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
+                        {
+                            VertexType nextVertex = indexToVertex[i];
+                            bool vertexInPath = false;
+                            for (const auto& pathVertex : currentPath) {
+                                if (pathVertex.id == nextVertex.id) {
+                                    vertexInPath = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!vertexInPath)
+                            {
+                                auto newPath = currentPath;
+                                newPath.push_back(nextVertex);
+                                stack.push({nextVertex, newPath});
+                            }
+                        }
+                    }
+                }
+            }
+
+            return pathCount;
         }
 
         void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
