@@ -207,7 +207,7 @@ namespace Appledore
             {
                 for (size_t destIndex = 0; destIndex < numVertices; ++destIndex)
                 {
-                    const auto& edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+                    const std::optional<EdgeInfo<EdgeType>>& edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
                     if (edgeValue.has_value())
                     {
                         edges.emplace_back(
