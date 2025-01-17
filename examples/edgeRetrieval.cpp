@@ -10,15 +10,18 @@ public:
 
     explicit TestVertex(const int id = 0) : id(id) {}
 
-    friend std::ostream& operator<<(std::ostream& os, const TestVertex& v) {
+    friend std::ostream &operator<<(std::ostream &os, const TestVertex &v)
+    {
         os << "Vertex " << v.id;
         return os;
     }
 };
 
-void printEdges(const auto& edges, const std::string& description) {
+void printEdges(const auto &edges, const std::string &description)
+{
     std::cout << description << "\n";
-    for (const auto& edge : edges) {
+    for (const auto &edge : edges)
+    {
         std::cout << "Edge from " << std::get<0>(edge)
                   << " to " << std::get<1>(edge)
                   << " with weight " << std::get<2>(edge) << "\n";
@@ -26,8 +29,10 @@ void printEdges(const auto& edges, const std::string& description) {
     std::cout << '\n';
 }
 
-int main() {
-    try {
+int main()
+{
+    try
+    {
         // Case 1: Default behavior (no sorting for arithmetic types)
         GraphMatrix<TestVertex, int, UndirectedG> graph1;
         TestVertex v1(1), v2(2), v3(3);
@@ -37,15 +42,15 @@ int main() {
         graph1.addEdge(v2, v3, 20);
         graph1.addEdge(v3, v1, 30);
 
-        auto edges1 = graph1.getAllEdges();
+        std::vector<std::tuple<TestVertex, TestVertex, int>> edges1 = graph1.getAllEdges();
         printEdges(edges1, "Case 1: Default Behavior (No Sorting)");
 
         // Case 2: Automatically sort edges in ascending order
-        auto edges2 = graph1.getAllEdges(true);
+        std::vector<std::tuple<TestVertex, TestVertex, int>> edges2 = graph1.getAllEdges(true);
         printEdges(edges2, "Case 2: Automatically Sorted (Ascending Order)");
 
         // Case 3: Automatically sort edges in descending order
-        auto edges3 = graph1.getAllEdges(false);
+        std::vector<std::tuple<TestVertex, TestVertex, int>> edges3 = graph1.getAllEdges(false);
         printEdges(edges3, "Case 3: Automatically Sorted (Descending Order)");
 
         // Case 4: Custom sorting logic
@@ -57,15 +62,17 @@ int main() {
         graph2.addEdge(v5, v6, 0.1f);
         graph2.addEdge(v6, v4, 0.21f);
 
-        auto edges4 = graph2.getAllEdges(
+        std::vector<std::tuple<TestVertex, TestVertex, float>> edges4 = graph2.getAllEdges(
             std::nullopt,
-            [](const auto& a, const auto& b) {
+            [](const auto &a, const auto &b)
+            {
                 return std::get<2>(a) > std::get<2>(b); // Custom: Sort by weight in descending order
             });
 
         printEdges(edges4, "Case 4: Custom Sorting Logic");
-
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Error: " << e.what() << '\n';
     }
 
