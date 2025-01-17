@@ -1,5 +1,5 @@
 #pragma once
-#include <functional>
+
 #include <vector>
 #include <iostream>
 #include <stdexcept>
@@ -165,8 +165,6 @@ namespace Appledore
                         const std::tuple<VertexType, VertexType, EdgeType>&)> customPredicate = nullptr) const
         {
             // Collect all edges
-            if (!isWeighted)
-                throw std::invalid_argument("Graph Must Be a Weighted Graph.");
             std::vector<std::tuple<VertexType, VertexType, EdgeType>> edges;
 
             for (size_t srcIndex = 0; srcIndex < numVertices; ++srcIndex)
