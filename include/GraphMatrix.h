@@ -1,5 +1,5 @@
 #pragma once
-
+#include <functional>
 #include <vector>
 #include <iostream>
 #include <stdexcept>
@@ -193,15 +193,21 @@ namespace Appledore
         }
 
         // Get all edges
-        std::vector<std::tuple<VertexType, VertexType, EdgeType>> getAllEdges() const
+        std::vector<std::tuple<VertexType, VertexType, EdgeType>> getAllEdges(
+     std::optional<bool> returnSorted = std::nullopt,
+     std::function<bool(const std::tuple<VertexType, VertexType, EdgeType>&,
+                        const std::tuple<VertexType, VertexType, EdgeType>&)> customPredicate = nullptr) const
         {
+            if (!isWeighted)
+                throw std::invalid_argument("Given Graph must be Weighted.");
+            // Collect all edges
             std::vector<std::tuple<VertexType, VertexType, EdgeType>> edges;
 
             for (size_t srcIndex = 0; srcIndex < numVertices; ++srcIndex)
             {
                 for (size_t destIndex = 0; destIndex < numVertices; ++destIndex)
                 {
-                    const auto &edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+                    const std::optional<EdgeInfo<EdgeType>>& edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
                     if (edgeValue.has_value())
                     {
                         edges.emplace_back(
@@ -211,8 +217,37 @@ namespace Appledore
                     }
                 }
             }
+
+            // Check if EdgeType is arithmetic
+            constexpr bool isArithmetic = std::is_arithmetic_v<EdgeType>;
+
+            if (customPredicate)
+            {
+                // Custom sorting logic
+                std::sort(edges.begin(), edges.end(), customPredicate);
+            }
+            else if (returnSorted.has_value())
+            {
+                if (!isArithmetic)
+                {
+                    throw std::invalid_argument("Automatic sorting requires EdgeType to be arithmetic.");
+                }
+                // Sort in ascending or descending order
+                std::sort(edges.begin(), edges.end(),
+                          [returnSorted](const auto& a, const auto& b) {
+                              return returnSorted.value() ? (std::get<2>(a) < std::get<2>(b))
+                                                          : (std::get<2>(a) > std::get<2>(b));
+                          });
+            }
+            else if (!isArithmetic)
+            {
+                throw std::invalid_argument("EdgeType must be arithmetic to return edges without sorting.");
+            }
+
             return edges;
         }
+
+
         // Get indegree for a vertex
         [[nodiscard]] size_t indegree(const VertexType &vertex) const
         {
