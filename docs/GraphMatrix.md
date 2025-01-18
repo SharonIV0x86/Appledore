@@ -97,13 +97,13 @@ GraphAlgorithms.h → Implements BFS, DFS, Shortest Path, etc.
 
 📌 Visual Representations
 1. Simple graph with mixed directed and undirected edges
-![1.  ](assets/1.webp)
+![1.  ](assets/1.png)
 
 2. Adjacency Matrix Representation (1D to 2D conversion):
-![2. ](assets/2.webp)
+![2. ](assets/2.png)
 
 3. Vertex Mapping (vertexToIndex and indexToVertex):
-![3. ](assets/3.webp)
+![3. ](assets/3.png)
 
 4. Flattening a 1D Vector into 2D using getIndex function:
 ![4. ](assets/4.png)
