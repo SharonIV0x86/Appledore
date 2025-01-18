@@ -1,33 +1,27 @@
-# **📌 Overview**
+📌 Overview
 
-``GraphMatrix.h`` is a header file that defines the GraphMatrix class, which represents a graph using an adjacency matrix. This data structure is useful for graph-related operations such as:
+GraphMatrix.h is a header file that defines the GraphMatrix class, which represents a graph using an adjacency matrix. This data structure is useful for graph-related operations such as:
 
-- Adding and removing vertices and edges
-- Retrieving connectivity information
-- Efficient traversal and manipulation of graph data
+Adding and removing vertices and edges
+Retrieving connectivity information
+Efficient traversal and manipulation of graph data
+🔹 Key Features
 
-
-**🔹 Key Features**
-Adjacency Matrix Representation: Uses a 1D matrix flattened as 2D matrix to store edges.
-Supports Weighted and Unweighted Graphs along: Can handle edge weights efficiently.
+Adjacency Matrix Representation: Uses a 1D matrix flattened as a 2D matrix to store edges.
+Supports Weighted and Unweighted Graphs: Can handle edge weights efficiently.
 Template-based Design: Allows customization of vertex and edge types.
+📌 Structure of GraphMatrix.h
 
-# **📌 Structure of GraphMatrix.h**
-
-### **🔹 Templates Used**
-```cpp
+🔹 Templates Used: 
 template <typename VertexType, typename EdgeType>
 class GraphMatrix {}
-```
+
 VertexType: Represents the type of vertices (e.g., int, std::string).
 EdgeType: Represents the type of edge weights (int, double, etc.).
 
-### **🔹 Class Definition**
-```cpp
 template <typename VertexType, typename EdgeType>
 class GraphMatrix {
 private:
-
     std::map<VertexType, size_t> vertexToIndex;
     std::vector<VertexType> indexToVertex;
     std::vector<std::optional<EdgeInfo<EdgeType>>> adjacencyMatrix;
@@ -42,53 +36,80 @@ public:
     std::vector<VertexType> getNeighbors(const VertexType& vertex);
     ...
 };
-```
-# **🔹 Important Components**
-### 1. **adjacencyMatrix**
-The ``adjacencyMatrix`` is a 1-Dimensional Vector that is being viewed as a 2-Dimensional vector by using a formula to calculate offsets to store values. Each value in the ``adjacencyMatrix`` is a ``std::optional`` value which means each element can have a value of ``EdgeInfo`` struct type or each element can be a ``std::nullopt`` signifying that there is no value present.
 
+🔹 Important Components
 
-### 2. **``numVertices``**
-This variable is maintained as private member to indicate the number of vertices which are currently present in a graph.
+1. adjacencyMatrix
+The adjacencyMatrix is a 1-Dimensional vector that is viewed as a 2-Dimensional matrix by using a formula to calculate offsets for storing values. Each element in the matrix is a std::optional containing an EdgeInfo struct or std::nullopt if no edge exists between the vertices.
 
-### 3. ``isDirected`` and ``isWeighted``
-These two variables are also private, they are used to determine about the directionality and weightedness of a graph.
+Representation: A 1D vector viewed as a 2D adjacency matrix.
+Data Type: std::optional<EdgeInfo<EdgeType>>
+Purpose: Stores edges efficiently using index-based access.
+To convert 2D indices (i, j) into a 1D index, a helper function is used:
+inline size_t getIndex(size_t i, size_t j) const {
+    return i * numVertices + j;
+}
 
-### 4. **vertexToIndex** 
-Maps a vertex to its corresponding index for faster lookups using a ``std::map``.
-### 5. **indexToVertex**  
-Maps a index to each of the vertex in the order they are inserted.
+This allows flattening and efficient memory access.
 
-### How are ``indexToVertex`` and ``vertexToIndex`` related?
-Consider a graph as empty, and suppose if you add a vertex **"A"** the vertex is first added to the last index of the ``indexToVertex`` in this case the **"A"** is saved at 0th index. And in ``vertexToIndex`` the integer index corresponding to vertex **"A"** is 0.
+Visual Representation of adjacencyMatrix:
 
+1D Representation:
+[ 0,  5, ∞, 10,  ∞, ∞, 2,  ∞, 7 ]
 
-# 📌 How GraphMatrix.h Works
+Flattened into a 2D Matrix (numVertices × numVertices):
+   A   B   C  
+A [ 0   5   ∞ ]  
+B [ 10  ∞   ∞ ]  
+C [ 2   ∞   7 ]  
 
-Adding a Vertex:
-Assigns an index to the vertex.
-Expands the adjacency matrix.
-Adding an Edge:
-Updates the adjacency matrix with the edge weight.
-Retrieving Neighbors:
-Uses the adjacency matrix to find connected vertices.
+Efficiently stores edge weights
+Fast index-based access
+2. numVertices
+This variable stores the current count of vertices in the graph.
+
+3. isDirected and isWeighted
+isDirected: true if the graph is directed.
+isWeighted: true if the graph has weighted edges.
+4. vertexToIndex
+This std::map maps each vertex to its corresponding index for fast lookups.
+
+5. indexToVertex
+This std::vector maps each index to the corresponding vertex in the order they were inserted.
+
+How are indexToVertex and vertexToIndex related?
+
+Consider a graph starting with an empty state. When you add a vertex "A", it is first added to the last index of indexToVertex. For this example, "A" would be at index 0. In vertexToIndex, the vertex "A" maps to index 0.
+
+📌 How GraphMatrix.h Works
+
+Adding a Vertex
+Assigns an index to the vertex and expands the adjacency matrix to accommodate new vertex connections.
+Adding an Edge
+Converts vertex names into numeric indices using vertexToIndex, then stores the edge weight in the adjacency matrix using getIndex(i, j).
+Retrieving Neighbors
+Uses the adjacency matrix to check which indices contain non-null values and converts numeric indices back to vertex names using indexToVertex.
 
 📌 Connections to Other Files
-🔹 Dependencies
-MixedGraph.h: Uses GraphMatrix as a base class for handling directed and undirected edges.
-GraphAlgorithms.h: Uses GraphMatrix to implement shortest path, DFS, BFS, etc.
-🔹 Interaction with Other Components
-GraphMatrix.h acts as the core data structure for graphs, enabling efficient access and modification of graph-related data.
 
-📌 Visual Representation
+MixedGraph.h → Extends GraphMatrix.h to support mixed graphs.
+GraphAlgorithms.h → Implements BFS, DFS, Shortest Path, etc.
 
-🔹 Adjacency Matrix Structure
-![Graphical Representation](<assets/Adjacency Matrix Structure.png>)
+📌 Visual Representations
+1. Simple graph with mixed directed and undirected edges
+![1.  ](assets/1.webp)
 
-🔹 Vertex Mapping
-![Graphical Representation](<assets/Vertex Mapping.jpg>)
+2. Adjacency Matrix Representation (1D to 2D conversion):
+![2. ](assets/2.webp)
 
-📌 Available Methods
+3. Vertex Mapping (vertexToIndex and indexToVertex):
+![3. ](assets/3.webp)
+
+4. Flattening a 1D Vector into 2D using getIndex function:
+![4. ](assets/4.png)
+
+📌 Available Methods:
+
 void addVertex(const VertexType& vertex);
 void addEdge(const VertexType& src, const VertexType& dest, EdgeType weight);
 bool hasEdge(const VertexType& src, const VertexType& dest);
