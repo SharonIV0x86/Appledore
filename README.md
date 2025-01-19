@@ -22,7 +22,7 @@ Code below implements the Graph relationship between Airports and Distances.
 ## Directed Weighted graph using Custom Structures/Classes
 ```cpp
 #include <iostream>
-#include "../include/GraphMatrix.h"
+#include "../include/GraphMatrix.hpp"
 
 using namespace Appledore;
 
@@ -123,7 +123,7 @@ Code below implements the Graph relationship between Airports and Distances.
 ## Undirected Weighted graph using Custom Structures/Classes
 ```cpp
 #include <iostream>
-#include "../include/GraphMatrix.h"
+#include "../include/GraphMatrix.hpp"
 using namespace Appledore;
 
 class Airport : public GraphVertex
@@ -243,7 +243,7 @@ Below is an example of how to use the library with custom vertex and edge types.
 ```cpp
 #include <iostream>
 #include <string>
-#include "./include/MixedGraph.h"
+#include "./include/MixedGraph.hpp"
 
 // Vertex class representing a state in the USA
 class State
