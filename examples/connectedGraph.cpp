@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/GraphMatrix.h"
+#include "../include/GraphMatrix.hpp"
 
 using namespace Appledore;
 
@@ -16,7 +16,7 @@ public:
     }
 };
 
-class Weight
+class Weight : public GraphEdge
 {
 public:
     int value;

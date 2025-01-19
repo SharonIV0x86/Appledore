@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../include/MixedGraph.h"
+#include "../include/MixedGraph.hpp"
 using namespace Appledore;
 
 int main()
