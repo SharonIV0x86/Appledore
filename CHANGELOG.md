@@ -11,7 +11,5 @@
 - Added ``MatrixRepresentation`` class in ``MatrixRep.hpp``. The ``MatrixRepresentation`` class serves as a parent for both ``GraphMatrix`` and ``MixedGraphMatrix`` classes to share common resouces.
 
 ## [1.0.0] - Released: 28th December 2024
-### Initial Release
-### Added
 - Minor feature updates
 - Added versioning
