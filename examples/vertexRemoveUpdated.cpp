@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/MixedGraph.h"
+#include "../include/MixedGraph.hpp"
 
 using namespace Appledore;
 
