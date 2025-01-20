@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <optional>
 #include <map>
-#include "MatrixRep.h"
+#include "MatrixRep.hpp"
 namespace Appledore
 {
     template <typename EdgeType>

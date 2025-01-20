@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stack>
-#include "../include/GraphMatrix.h"
+#include "../include/GraphMatrix.hpp"
 
 using namespace Appledore;
 
@@ -17,13 +17,9 @@ public:
         return os;
     }
 
-    bool operator==(const Airport &other) const
-    {
-        return name == other.name;
-    }
 };
 
-class Flight
+class Flight : public GraphEdge
 {
 public:
     int distance;
@@ -92,7 +88,7 @@ int main()
     }
 
     // Example usage of findAllPaths
-    std::cout << "\nFinding all paths from LAX to ATL:\n";
+    std::cout << "\nFinding all paths from LAX to ATL without any Path Limit:\n";
     auto paths = AirportsGraph.findAllPaths(LAX, ATL);
     for (const auto &path : paths)
     {
@@ -101,6 +97,49 @@ int main()
             std::cout << vertex << " -> ";
         }
         std::cout << "END\n";
+    }
+
+    // ---------------------------------------------------------
+    // NEW BLOCK
+    // Example usage of findAllPaths with a path limit
+    // ---------------------------------------------------------
+    size_t pathLimit = 2; // Example of a path limit
+    std::cout << "\nFinding at most " << pathLimit << " paths from LAX to ATL:\n";
+    try
+    {
+        auto limitedPaths = AirportsGraph.findAllPaths(LAX, ATL, pathLimit);
+        for (const auto &path : limitedPaths)
+        {
+            for (const auto &vertex : path)
+            {
+                std::cout << vertex << " -> ";
+            }
+            std::cout << "END\n";
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << "\n";
+    }
+
+    // Example of exceeding path limit
+    size_t excessiveLimit = 10; // Example of exceeding path limit
+    std::cout << "\nAttempting to find " << excessiveLimit << " paths from LAX to ATL:\n";
+    try
+    {
+        auto excessivePaths = AirportsGraph.findAllPaths(LAX, ATL, excessiveLimit);
+        for (const auto &path : excessivePaths)
+        {
+            for (const auto &vertex : path)
+            {
+                std::cout << vertex << " -> ";
+            }
+            std::cout << "END\n";
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << "\n";
     }
 
     return 0;

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/GraphMatrix.h"
+#include "../include/GraphMatrix.hpp"
 
 using namespace Appledore;
 
@@ -17,7 +17,7 @@ public:
     }
 };
 
-class Flight
+class Flight : public GraphEdge
 {
 public:
     int distance;

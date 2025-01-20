@@ -1,5 +1,5 @@
 #pragma once
-
+#include <functional>
 #include <vector>
 #include <iostream>
 #include <stdexcept>
@@ -8,9 +8,10 @@
 #include <stack>
 #include <algorithm>
 #include <set>
-#include "MatrixRep.h"
+#include "MatrixRep.hpp"
 namespace Appledore
 {
+
     template <typename EdgeType>
     struct EdgeInfo
     {
@@ -22,7 +23,7 @@ namespace Appledore
 
     // GraphMatrix class template
     template <typename VertexType, typename EdgeType, typename Direction>
-    class GraphMatrix : Appledore::MatrixRepresentation
+    class GraphMatrix: public Appledore::MatrixRepresentation
     {
     public:
         GraphMatrix()
@@ -46,7 +47,7 @@ namespace Appledore
             adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
         }
 
-        bool operator()(const VertexType src, const VertexType &dest)
+        bool operator()(const VertexType &src, const VertexType &dest)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
             {
@@ -159,15 +160,22 @@ namespace Appledore
         }
 
         // Get all edges
-        std::vector<std::tuple<VertexType, VertexType, EdgeType>> getAllEdges() const
+        std::vector<std::tuple<VertexType, VertexType, EdgeType>> getAllEdges(
+            std::optional<bool> returnSorted = std::nullopt,
+            std::function<bool(const std::tuple<VertexType, VertexType, EdgeType> &,
+                               const std::tuple<VertexType, VertexType, EdgeType> &)>
+                customPredicate = nullptr) const
         {
+            if (!isWeighted)
+                throw std::invalid_argument("Given Graph must be Weighted.");
+            // Collect all edges
             std::vector<std::tuple<VertexType, VertexType, EdgeType>> edges;
 
             for (size_t srcIndex = 0; srcIndex < numVertices; ++srcIndex)
             {
                 for (size_t destIndex = 0; destIndex < numVertices; ++destIndex)
                 {
-                    const auto &edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+                    const std::optional<EdgeInfo<EdgeType>> &edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
                     if (edgeValue.has_value())
                     {
                         edges.emplace_back(
@@ -177,8 +185,40 @@ namespace Appledore
                     }
                 }
             }
+
+            constexpr bool isArithmetic = std::is_arithmetic_v<EdgeType>;
+
+            if (!returnSorted.has_value() && customPredicate == nullptr)
+            {
+                // If no sorting is required, return the edges as is
+                return edges;
+            }
+
+            if (customPredicate)
+            {
+                // Use custom predicate for sorting
+                std::sort(edges.begin(), edges.end(), customPredicate);
+            }
+            else if (returnSorted.has_value())
+            {
+                // Check if EdgeType is arithmetic for automatic sorting
+                if (!isArithmetic)
+                {
+                    throw std::invalid_argument("Automatic sorting requires EdgeType to be arithmetic.");
+                }
+
+                // Automatic sorting in ascending or descending order
+                std::sort(edges.begin(), edges.end(),
+                          [returnSorted](const auto &a, const auto &b)
+                          {
+                              return returnSorted.value() ? (std::get<2>(a) < std::get<2>(b))
+                                                          : (std::get<2>(a) > std::get<2>(b));
+                          });
+            }
+
             return edges;
         }
+
         // Get indegree for a vertex
         [[nodiscard]] size_t indegree(const VertexType &vertex) const
         {
@@ -276,36 +316,65 @@ namespace Appledore
         }
 
         // find all paths b/w two vertices
-        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest)
+        // Modifying the findAllPaths method, adding the pathLimit parameter
+        std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest, size_t pl = 0)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
                 throw std::invalid_argument("One or both vertices do not exist");
 
+            if (pl < 0)
+                throw std::invalid_argument("Path limit must be a non-negative integer!");
+
+            // Compute the total number of paths only if the user specified a limit, this optimizes the performance.
+            if (pl > 0)
+            {
+                size_t totalPaths = countPathsDFS(src, dest);
+                if (pl > totalPaths)
+                    throw std::invalid_argument("Path limit exceeds the total number of possible paths");
+            }
+
             std::vector<std::vector<VertexType>> allPaths;
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
-            std::map<VertexType, bool> visited;
 
             stack.push({src, {src}});
 
             while (!stack.empty())
             {
-                auto [current, currentPath] = stack.top();
+                std::pair<VertexType, std::vector<VertexType>> currentElement = stack.top();
                 stack.pop();
-                visited[current] = true;
+
+                VertexType current = currentElement.first;
+                std::vector<VertexType> currentPath = currentElement.second;
 
                 if (current == dest)
                 {
                     allPaths.push_back(currentPath);
+
+                    // Check if the path limit has been reached
+                    if (pl > 0 && allPaths.size() >= pl)
+                    {
+                        break;
+                    }
                 }
                 else
                 {
-                    size_t currentIndex = vertexToIndex[current];
+                    size_t currentIndex = vertexToIndex.at(current);
                     for (size_t i = 0; i < numVertices; ++i)
                     {
                         if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
                         {
                             VertexType nextVertex = indexToVertex[i];
-                            if (std::find(currentPath.begin(), currentPath.end(), nextVertex) == currentPath.end())
+                            bool vertexInPath = false;
+                            for (const auto &pathVertex : currentPath)
+                            {
+                                if (pathVertex.id == nextVertex.id)
+                                {
+                                    vertexInPath = true;
+                                    break;
+                                }
+                            }
+
+                            if (!vertexInPath)
                             {
                                 auto newPath = currentPath;
                                 newPath.push_back(nextVertex);
@@ -314,7 +383,6 @@ namespace Appledore
                         }
                     }
                 }
-                visited[current] = false;
             }
 
             return allPaths;
@@ -323,19 +391,24 @@ namespace Appledore
         // Calculate the density of the graph
         // For undirected graphs: density = (2 * |E|) / (|V| * (|V| - 1))
         // For directed graphs: density = |E| / (|V| * (|V| - 1))
-        [[nodiscard]] double density() const {
-            if (numVertices <= 1) {
+        [[nodiscard]] double density() const
+        {
+            if (numVertices <= 1)
+            {
                 return 0.0;
             }
 
             size_t edgeCount = 0;
-            for (size_t i = 0; i < adjacencyMatrix.size(); ++i) {
-                if (adjacencyMatrix[i].has_value()) {
+            for (size_t i = 0; i < adjacencyMatrix.size(); ++i)
+            {
+                if (adjacencyMatrix[i].has_value())
+                {
                     edgeCount++;
                 }
             }
 
-            if (!isDirected) {
+            if (!isDirected)
+            {
                 edgeCount /= 2;
             }
 
@@ -353,7 +426,71 @@ namespace Appledore
                 return false;
             std::vector<bool> visited(numVertices, false);
             dfsforConnectivity(0, visited);
-            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+            return std::all_of(visited.begin(), visited.end(), [](bool v)
+                               { return v; });
+        }
+
+        // ---------------------------------------------------------
+        // NEW METHOD: countPathsDFS()
+        // Helper Function to count the number of total paths between two vertices using DFS
+        // ---------------------------------------------------------
+        size_t countPathsDFS(const VertexType &src, const VertexType &dest)
+        {
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+                throw std::invalid_argument("One or both vertices do not exist");
+
+            //  Fixing the previous issue, i.e. Stack for DFS: stores the current vertex and the path taken so far
+            std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
+
+            // Start DFS from the source vertex
+            stack.push({src, {src}});
+
+            size_t pathCount = 0;
+
+            while (!stack.empty())
+            {
+                std::pair<VertexType, std::vector<VertexType>> currentElement = stack.top();
+                stack.pop();
+
+                VertexType current = currentElement.first;
+                std::vector<VertexType> currentPath = currentElement.second;
+
+                if (current == dest)
+                {
+                    // Found a valid path to the destination
+                    pathCount++;
+                }
+                else
+                {
+                    size_t currentIndex = vertexToIndex[current];
+                    for (size_t i = 0; i < numVertices; ++i)
+                    {
+                        // Check if there's an edge from the current vertex to the next vertex
+                        if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
+                        {
+                            VertexType nextVertex = indexToVertex[i];
+                            bool vertexInPath = false;
+                            for (const auto &pathVertex : currentPath)
+                            {
+                                if (pathVertex.id == nextVertex.id)
+                                {
+                                    vertexInPath = true;
+                                    break;
+                                }
+                            }
+
+                            if (!vertexInPath)
+                            {
+                                auto newPath = currentPath;
+                                newPath.push_back(nextVertex);
+                                stack.push({nextVertex, newPath});
+                            }
+                        }
+                    }
+                }
+            }
+
+            return pathCount;
         }
 
         void dfsforConnectivity(size_t start, std::vector<bool> &visited) const
@@ -384,20 +521,25 @@ namespace Appledore
         // ---------------------------------------------------------
         // NEW METHOD: removeVertex()
         // ---------------------------------------------------------
-        void removeVertex(const VertexType &vert) {
+        void removeVertex(const VertexType &vert)
+        {
 
-            if (!vertexToIndex.count(vert)) {
+            if (!vertexToIndex.count(vert))
+            {
                 throw std::invalid_argument("Vertex does not exist in the graph.");
             }
 
             size_t remIdx = vertexToIndex[vert];
             size_t lastIdx = numVertices - 1;
 
-            if (remIdx != lastIdx) {
-                for (size_t c = 0; c < numVertices; ++c) {
+            if (remIdx != lastIdx)
+            {
+                for (size_t c = 0; c < numVertices; ++c)
+                {
                     std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
                 }
-                for (size_t r = 0; r < numVertices; ++r) {
+                for (size_t r = 0; r < numVertices; ++r)
+                {
                     std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
                 }
 
@@ -412,8 +554,10 @@ namespace Appledore
             size_t newSize = (numVertices - 1) * (numVertices - 1);
             std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
 
-            for (size_t r = 0; r < numVertices - 1; ++r) {
-                for (size_t c = 0; c < numVertices - 1; ++c) {
+            for (size_t r = 0; r < numVertices - 1; ++r)
+            {
+                for (size_t c = 0; c < numVertices - 1; ++c)
+                {
                     newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
                 }
             }

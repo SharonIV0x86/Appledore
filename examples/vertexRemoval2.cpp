@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "../include/GraphMatrix.h" 
+#include "../include/GraphMatrix.hpp" 
 int main()
 {
     // Here, we assume you are using:
