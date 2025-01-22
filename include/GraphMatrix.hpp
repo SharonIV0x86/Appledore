@@ -651,23 +651,6 @@ namespace Appledore
             }
         }
 
-    friend std::ostream& operator<<(std::ostream& src, const GraphMatrix& other) {
-        src << "GraphMatrix Object:\n";
-        src << "\tVertex List:\n";
-        std::vector<VertexType> vertices = other.getVertices();
-        for (VertexType vertex : vertices) {
-            src << "\t\t" << vertex << std::endl;
-        }
-
-        src << "\tEdge List:\n";
-        for (VertexType incident : vertices) {
-            for (VertexType terminal : other.getNeighbors(incident)) {
-                src << "\t\t " << incident << "-->" << terminal << std::endl;
-            }
-        }
-        return src;
-    }
-
     private:
         std::map<VertexType, size_t> vertexToIndex;
         std::vector<VertexType> indexToVertex;

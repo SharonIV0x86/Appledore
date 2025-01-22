@@ -34,4 +34,6 @@ int main() {
     }
     std::cout << "\n";
     return 0;
+
+    Appledore::GraphMatrix<Vertex, std::string, Appledore::UndirectedG> strgraph;
 }
