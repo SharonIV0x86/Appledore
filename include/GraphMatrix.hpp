@@ -8,7 +8,10 @@
 #include <stack>
 #include <algorithm>
 #include <set>
+#include <queue>
+#include <limits>
 #include "MatrixRep.hpp"
+
 namespace Appledore
 {
 
@@ -518,6 +521,31 @@ namespace Appledore
             }
         }
 
+        std::vector<EdgeType> bfs(size_t start, size_t maxDepth) {
+            EdgeType inf = std::numeric_limits<EdgeType>::infinity();
+            std::vector<EdgeType> dist(numVertices, inf);
+            dist[start] = 0;
+
+            std::queue<VertexType> queue;
+            queue.push(indexToVertex[start]);
+            size_t depth = 0;
+
+            while (!queue.empty() && depth <= maxDepth) {
+                VertexType current = queue.front();
+                queue.pop();
+                depth = dist[vertexToIndex[current]];
+
+                for (VertexType neighbor : getNeighbors(current)) {
+                    EdgeType weight = getEdge(current, neighbor);
+                    if (dist[vertexToIndex[neighbor]] == inf) {
+                        dist[vertexToIndex[neighbor]] = dist[vertexToIndex[current]] + weight;
+                        queue.push(neighbor);
+                    }
+                }
+            }
+            return dist;
+        }; 
+
         // ---------------------------------------------------------
         // NEW METHOD: removeVertex()
         // ---------------------------------------------------------
@@ -622,6 +650,23 @@ namespace Appledore
                 adjacencyMatrix[getIndex(destIndex, srcIndex)] = EdgeInfo<EdgeType>(newEdgeValue);
             }
         }
+
+    friend std::ostream& operator<<(std::ostream& src, const GraphMatrix& other) {
+        src << "GraphMatrix Object:\n";
+        src << "\tVertex List:\n";
+        std::vector<VertexType> vertices = other.getVertices();
+        for (VertexType vertex : vertices) {
+            src << "\t\t" << vertex << std::endl;
+        }
+
+        src << "\tEdge List:\n";
+        for (VertexType incident : vertices) {
+            for (VertexType terminal : other.getNeighbors(incident)) {
+                src << "\t\t " << incident << "-->" << terminal << std::endl;
+            }
+        }
+        return src;
+    }
 
     private:
         std::map<VertexType, size_t> vertexToIndex;
