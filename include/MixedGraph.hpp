@@ -238,48 +238,53 @@ namespace Appledore
         return edges;
     }
 
-    // ---------------------------------------------------
-    // New method to remove a vertex from the graph
-    // ---------------------------------------------------
     template <typename VertexType, typename EdgeType>
     void MixedGraphMatrix<VertexType, EdgeType>::removeVertex(const VertexType &vert)
     {
+
         if (!vertexToIndex.count(vert))
         {
-            throw std::invalid_argument("Vertex does not exist");
+            throw std::invalid_argument("Vertex does not exist in the graph.");
         }
 
-        size_t removeIndex = vertexToIndex[vert];
-        vertexToIndex.erase(vert);
-        
-        // If the vertex is not the last one, move the last vertex to this position
-        if (removeIndex != numVertices - 1)
-        {
-            VertexType lastVertex = indexToVertex.back();
-            indexToVertex[removeIndex] = lastVertex;
-            vertexToIndex[lastVertex] = removeIndex;
-        }
+        size_t remIdx = vertexToIndex[vert];
+        size_t lastIdx = numVertices - 1;
 
-        indexToVertex.pop_back();
-        numVertices--;
-
-        // Build the new adjacency matrix
-        std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(numVertices * numVertices, std::nullopt);
-        for (size_t i = 0; i < numVertices + 1; ++i)
+        if (remIdx != lastIdx)
         {
-            if (i == removeIndex) continue;
-            for (size_t j = 0; j < numVertices + 1; ++j)
+            for (size_t c = 0; c < numVertices; ++c)
             {
-                if (j == removeIndex) continue;
-                size_t newRow = (i < removeIndex) ? i : i - 1;
-                size_t newCol = (j < removeIndex) ? j : j - 1;
-                newMatrix[newRow * numVertices + newCol] = adjacencyMatrix[i * (numVertices + 1) + j];
+                std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
+            }
+            for (size_t r = 0; r < numVertices; ++r)
+            {
+                std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
+            }
+
+            VertexType movedVertex = indexToVertex[lastIdx];
+            vertexToIndex[movedVertex] = remIdx;
+            indexToVertex[remIdx] = movedVertex;
+        }
+
+        vertexToIndex.erase(vert);
+        indexToVertex.pop_back();
+
+        size_t newSize = (numVertices - 1) * (numVertices - 1);
+        std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
+
+        for (size_t r = 0; r < numVertices - 1; ++r)
+        {
+            for (size_t c = 0; c < numVertices - 1; ++c)
+            {
+                newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
             }
         }
 
         adjacencyMatrix = std::move(newMatrix);
+
+        --numVertices;
     }
-    // ---------------------------------------------------
+   
     template <typename VertexType, typename EdgeType>
     size_t MixedGraphMatrix<VertexType, EdgeType>::indegree(const VertexType &vertex) const
     {
