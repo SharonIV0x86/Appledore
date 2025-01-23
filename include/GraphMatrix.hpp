@@ -521,10 +521,16 @@ namespace Appledore
             }
         }
 
-        std::vector<EdgeType> bfs(size_t start, size_t maxDepth) {
+        std::map<VertexType, EdgeType> bfs(VertexType& startVertex, size_t maxDepth) {
+            size_t start = vertexToIndex[startVertex];
             EdgeType inf = std::numeric_limits<EdgeType>::infinity();
-            std::vector<EdgeType> dist(numVertices, inf);
-            dist[start] = 0;
+            std::map<VertexType, EdgeType> dist;
+            
+            for (size_t i = 0; i < numVertices; i++) {
+                dist[indexToVertex[i]] = inf;
+            }
+
+            dist[startVertex] = 0;
 
             std::queue<VertexType> queue;
             queue.push(indexToVertex[start]);
@@ -533,12 +539,13 @@ namespace Appledore
             while (!queue.empty() && depth <= maxDepth) {
                 VertexType current = queue.front();
                 queue.pop();
-                depth = dist[vertexToIndex[current]];
+                depth = dist[current];
 
                 for (VertexType neighbor : getNeighbors(current)) {
                     EdgeType weight = getEdge(current, neighbor);
-                    if (dist[vertexToIndex[neighbor]] == inf) {
-                        dist[vertexToIndex[neighbor]] = dist[vertexToIndex[current]] + weight;
+                    
+                    if (dist[neighbor] == inf) {
+                        dist[neighbor] = dist[current] + weight;
                         queue.push(neighbor);
                     }
                 }

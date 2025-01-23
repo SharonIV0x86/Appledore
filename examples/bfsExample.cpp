@@ -27,13 +27,12 @@ int main() {
     undirected.addEdge(v2,v3,1);
     undirected.addEdge(v1,v4,1);
 
-    std::vector<double> dist = undirected.bfs(2, 10);
+    std::map<Vertex, double> dist = undirected.bfs(v1, 10);
 
-    for (int item : dist) {
-        std::cout << item << " ";
+    for (Vertex v : undirected.getVertices()) {
+        std::cout << dist[v] << std::endl;
     }
+    
     std::cout << "\n";
     return 0;
-
-    Appledore::GraphMatrix<Vertex, std::string, Appledore::UndirectedG> strgraph;
 }
