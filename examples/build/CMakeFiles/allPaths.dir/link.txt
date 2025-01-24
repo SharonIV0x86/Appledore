@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/allPaths.dir/link.d CMakeFiles/allPaths.dir/allPaths.cpp.o -o allPaths

@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/isolatedVertices.dir/link.d CMakeFiles/isolatedVertices.dir/isolatedVertices.cpp.o -o isolatedVertices

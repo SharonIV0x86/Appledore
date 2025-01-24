@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/primitiveGraph.dir/link.d CMakeFiles/primitiveGraph.dir/primitiveGraph.cpp.o -o primitiveGraph

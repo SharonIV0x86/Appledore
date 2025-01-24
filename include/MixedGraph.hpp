@@ -8,16 +8,6 @@
 #include "MatrixRep.hpp"
 namespace Appledore
 {
-    template <typename EdgeType>
-    struct EdgeInfo
-    {
-        EdgeType value;
-        bool isDirected;
-
-        EdgeInfo() : value(), isDirected(false) {}
-        EdgeInfo(const EdgeType &value, bool isDirected = false)
-            : value(value), isDirected(isDirected) {}
-    };
     template <typename VertexType, typename EdgeType = bool>
     class MixedGraphMatrix : public Appledore::MatrixRepresentation
     {

@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/vertexRemoval.dir/link.d CMakeFiles/vertexRemoval.dir/vertexRemoval.cpp.o -o vertexRemoval
