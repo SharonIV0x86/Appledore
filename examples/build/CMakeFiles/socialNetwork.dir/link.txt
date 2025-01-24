@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/socialNetwork.dir/link.d CMakeFiles/socialNetwork.dir/socialNetwork.cpp.o -o socialNetwork
