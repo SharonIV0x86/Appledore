@@ -66,8 +66,19 @@ namespace Appledore
         }
     };
     size_t Appledore::GraphEdge::nextId = 1;
-    class MatrixRepresentation{
-        //common methods.
+    class MatrixRepresentation
+    {
+        // common methods.
+    };
+    template <typename EdgeType>
+    struct EdgeInfo
+    {
+        EdgeType value;
+        bool isDirected;
+
+        EdgeInfo() : value(), isDirected(false) {}
+        EdgeInfo(const EdgeType &value, bool isDirected = false)
+            : value(value), isDirected(isDirected) {}
     };
 
 }
