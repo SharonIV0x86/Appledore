@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/undirectedGraph.dir/link.d CMakeFiles/undirectedGraph.dir/undirectedGraph.cpp.o -o undirectedGraph

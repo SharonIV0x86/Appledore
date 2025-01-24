@@ -12,15 +12,6 @@
 namespace Appledore
 {
 
-    template <typename EdgeType>
-    struct EdgeInfo
-    {
-        EdgeType value;
-
-        EdgeInfo(const EdgeType &value) : value(value) {}
-        EdgeInfo() {}
-    };
-
     // GraphMatrix class template
     template <typename VertexType, typename EdgeType, typename Direction>
     class GraphMatrix: public Appledore::MatrixRepresentation
