@@ -27,10 +27,21 @@ namespace Appledore
                     random_data.push_back(dist(engine));
                 }
             }
+            else
+            {
+                for (int i = 0; i < 20; i++)
+                    random_data.push_back(i + 1);
+            }
         }
         [[nodiscard]] type_store_data get_vertex_name()
         {
             return vertex_name;
+        }
+        void show_random_data(){
+            for(const auto& ae: random_data){
+                std::cout << ae << " ";
+            }
+            
         }
     };
     template <typename weight_type>

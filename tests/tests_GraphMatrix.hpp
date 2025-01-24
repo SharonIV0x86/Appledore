@@ -26,8 +26,8 @@ namespace Appledore
 
         // Constructor to initialize the vertices and the graph
         C_TestGraphMatrix()
-            : v1("vertex_1"), v2("vertex_2"), v3("vertex_3"), v4("vertex_4"),
-              v5("vertex_5"), v6("vertex_6"), v7("vertex_7"), v8("vertex_8") {}
+            : v1("vertex_1", true), v2("vertex_2", true), v3("vertex_3", true), v4("vertex_4", true),
+              v5("vertex_5", true), v6("vertex_6", true), v7("vertex_7", true), v8("vertex_8", true) {}
 
         GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> create_graph()
         {
@@ -82,9 +82,9 @@ namespace Appledore
                 return false;
             }
         }
-        bool test_isConnected(){
-            
-        }
+        // bool test_isConnected(){
+
+        // }
         void init_tests()
         {
             // testing totalDegree()
@@ -95,7 +95,7 @@ namespace Appledore
             }
             else
             {
-                std::cout << "test_totalDegree -->      ";
+                std::cout << "test_totalDegree() -->      ";
                 printColoredText("PASSED\n", ANSI_COLOR_GREEN);
             }
             // testing getNeighbors
@@ -109,6 +109,32 @@ namespace Appledore
                 std::cout << "test_getNeighbors() --> ";
                 printColoredText("PASSED\n", ANSI_COLOR_GREEN);
             }
+        }
+        void show_vertex_data()
+        {
+            std::cout << "\nVertex 1 data: ";
+            v1.show_random_data();
+
+            std::cout << "\nVertex 2 data: ";
+            v2.show_random_data();
+
+            std::cout << "\nVertex 3 data: ";
+            v3.show_random_data();
+
+            std::cout << "\nVertex 4 data: ";
+            v4.show_random_data();
+
+            std::cout << "\nVertex 5 data: ";
+            v5.show_random_data();
+
+            std::cout << "\nVertex 6 data: ";
+            v6.show_random_data();
+
+            std::cout << "\nVertex 7 data: ";
+            v7.show_random_data();
+
+            std::cout << "\nVertex 8 data: ";
+            v8.show_random_data();
         }
     };
 }
