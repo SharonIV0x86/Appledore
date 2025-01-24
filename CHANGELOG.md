@@ -1,5 +1,6 @@
 # Changelog
 ## [2.1.0] - Released: 24th January 2025
+### Minor Release
 - Fixed ``removeVertex`` method in ``MixedGraph.h``
 - Added comprehensive test suite with each defined unit tests for ``GraphMatrix.hpp`` 
 
