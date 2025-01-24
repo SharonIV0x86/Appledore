@@ -50,11 +50,12 @@ namespace Appledore
         {
             return vertex_name;
         }
-        void show_random_data(){
-            for(const auto& ae: random_data){
+        void show_random_data()
+        {
+            for (const auto &ae : random_data)
+            {
                 std::cout << ae << " ";
             }
-
         }
     };
     template <typename weight_type>
@@ -94,6 +95,5 @@ namespace Appledore
         using CustomVertex_3 = custom_vertex_1<PrimitiveVertexEdges_T::vertex_primitive_3_t>;
         using CustomEdge_3 = custom_edge_1<PrimitiveVertexEdges_T::edge_primitive_1_t>;
     }
-    
 
 }
