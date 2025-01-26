@@ -82,9 +82,77 @@ namespace Appledore
                 return false;
             }
         }
-        // bool test_isConnected(){
+        bool test_hasEdge()
+        {
+            if (!ggraph.hasEdge(v1, v2) || !ggraph.hasEdge(v1, v4) ||
+                !ggraph.hasEdge(v1, v8))
+            {
+                return false;
+            }
 
-        // }
+            if (!ggraph.hasEdge(v2, v3))
+            {
+                return false;
+            }
+            if (!ggraph.hasEdge(v3, v7) || !ggraph.hasEdge(v3, v8))
+            {
+                return false;
+            }
+            if (!ggraph.hasEdge(v8, v5) || !ggraph.hasEdge(v8, v6))
+            {
+                return false;
+            }
+            if (!ggraph.hasEdge(v6, v7))
+            {
+                return false;
+            }
+            return true;
+        }
+        bool test_getVertices()
+        {
+            std::vector<custom_vertex_1<std::string>> vertices = ggraph.getVertices();
+
+            if (std::find(vertices.begin(), vertices.end(), v1) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v2) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v3) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v4) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v5) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v6) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v7) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v8) == vertices.end())
+            {
+                return false;
+            }
+            return true;
+        }
         void init_tests()
         {
             // testing totalDegree()
@@ -108,6 +176,24 @@ namespace Appledore
             {
                 std::cout << "test_getNeighbors() --> ";
                 printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+            }
+            if (!test_hasEdge())
+            {
+                std::cout << "test_hasEdge() ";
+                printColoredText("FAILED\n", ANSI_COLOR_RED);
+            }
+            else
+            {
+                std::cout << "test_hasEdge() --> ";
+                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+            }
+            if(!test_getVertices()){
+                std::cout << "test_getVertices() --> ";
+                printColoredText("FAILED\n", ANSI_COLOR_RED);
+            }else{
+                std::cout << "test_getVertices() --> ";
+                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+
             }
         }
         void show_vertex_data()
