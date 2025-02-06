@@ -22,7 +22,7 @@ namespace Appledore
         std::random_device rd;
         std::mt19937 gen(rd());
         const std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        const size_t name_length = 10; 
+        const size_t name_length = 10;
         std::uniform_int_distribution<> dist(0, charset.size() - 1);
         std::stringstream ss;
         for (size_t i = 0; i < name_length; ++i)
@@ -37,48 +37,49 @@ namespace Appledore
     class GraphVertex
     {
     public:
-        size_t id;
+        size_t __id_;
         static size_t nextId;
-        std::string v_name;
+        std::string __v___name;
+
         GraphVertex()
         {
-            id = nextId++;
-            v_name = __generate_vertex_name();
+            __id_ = nextId++;
+            __v___name = __generate_vertex_name();
         }
-        GraphVertex(std::string vertexName): v_name{vertexName}{};
+        GraphVertex(std::string vertexName) : __v___name{vertexName} {};
 
         bool operator<(const GraphVertex &other) const
         {
-            return id < other.id;
+            return __id_ < other.__id_;
         }
         bool operator==(const GraphVertex &other) const
         {
-            return id == other.id;
+            return __id_ == other.__id_;
         }
     };
     size_t Appledore::GraphVertex::nextId = 1;
     class GraphEdge
     {
     public:
-        size_t id;
+        size_t __id_;
         static size_t nextId;
         std::string e_name;
         GraphEdge()
         {
-            id = nextId++;
+            __id_ = nextId++;
         }
 
         bool operator<(const GraphEdge &other) const
         {
-            return id < other.id;
+            return __id_ < other.__id_;
         }
         bool operator>(const GraphEdge &other) const
         {
-            return id > other.id;
+            return __id_ > other.__id_;
         }
         bool operator==(const GraphEdge &other) const
         {
-            return id == other.id;
+            return __id_ == other.__id_;
         }
     };
     size_t Appledore::GraphEdge::nextId = 1;
