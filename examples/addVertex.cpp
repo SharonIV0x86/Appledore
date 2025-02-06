@@ -1,74 +1,72 @@
-#include "../include/MixedGraph.hpp" // Ensure this is the correct path to the MixedGraphMatrix header
 #include <iostream>
-#include <string>
-#include <exception>
+#include "../include/MixedGraph.hpp"
 
-// Example vertex type
-struct Vertex {
-    std::string name;
-
-    bool operator<(const Vertex &other) const { return name < other.name; }
-    bool operator==(const Vertex &other) const { return name == other.name; }
-    friend std::ostream &operator<<(std::ostream &os, const Vertex &v) {
-        return os << v.name;
+// Helper function to print adjacency matrix
+template <typename VertexType, typename EdgeType>
+void printAdjacencyMatrix(const Appledore::MixedGraphMatrix<VertexType, EdgeType>& graph) {
+    size_t numVertices = graph.getNumVertices();
+    for (size_t i = 0; i < numVertices; ++i) {
+        for (size_t j = 0; j < numVertices; ++j) {
+            std::cout << (graph.hasEdge(graph.getVertices()[i], graph.getVertices()[j]) 
+                          ? std::to_string(graph.getEdgeValue(graph.getVertices()[i], graph.getVertices()[j])) 
+                          : "0") << " ";
+        }
+        std::cout << "\n";
     }
-};
+}
+
+// Helper function to print vertex mappings
+template <typename VertexType, typename EdgeType>
+void printVertexMappings(const Appledore::MixedGraphMatrix<VertexType, EdgeType>& graph) {
+    std::cout << "Vertex-to-Index Mapping:\n";
+    for (const auto& pair : graph.getVertexToIndex()) {
+        std::cout << pair.first << " -> " << pair.second << "\n";
+    }
+
+    std::cout << "Index-to-Vertex Mapping:\n";
+    for (size_t i = 0; i < graph.getIndexToVertex().size(); ++i) {
+        std::cout << i << " -> " << graph.getIndexToVertex()[i] << "\n";
+    }
+}
+
+// Function to test the graph functionality
+template <typename VertexType, typename EdgeType>
+void testGraph(Appledore::MixedGraphMatrix<VertexType, EdgeType>& graph, 
+               const std::vector<VertexType>& vertices) {
+    std::cout << "Before adding vertices:\n";
+    printAdjacencyMatrix(graph);
+    std::cout << "Number of vertices: " << graph.getNumVertices() << "\n";
+    
+    // Add vertices
+    for (const auto& vertex : vertices) {
+        graph.addVertex(vertex);
+    }
+
+    std::cout << "After adding vertices:\n";
+    printAdjacencyMatrix(graph);
+    std::cout << "Number of vertices: " << graph.getNumVertices() << "\n";
+
+    // Print mappings
+    printVertexMappings(graph);
+}
 
 int main() {
-    try {
-        // Directed and unweighted graph
-        Appledore::MixedGraphMatrix<Vertex> directedUnweightedGraph;
+    // Test cases for different graph types
+    std::vector<int> directedVertices = {1, 2, 3};
+    Appledore::MixedGraphMatrix<int, bool> directedGraph;
+    testGraph(directedGraph, directedVertices);
 
-        Vertex A{"A"}, B{"B"}, C{"C"};
+    std::vector<int> weightedDirectedVertices = {4, 5, 6};
+    Appledore::MixedGraphMatrix<int, double> weightedDirectedGraph;
+    testGraph(weightedDirectedGraph, weightedDirectedVertices);
 
-        // Test: Adding multiple vertices
-        std::cout << "Adding vertices A, B, C to directed unweighted graph." << std::endl;
-        directedUnweightedGraph.addVertex(A, B, C);
+    std::vector<int> undirectedVertices = {7, 8, 9};
+    Appledore::MixedGraphMatrix<int, bool> undirectedGraph;
+    testGraph(undirectedGraph, undirectedVertices);
 
-        // Test: Adding duplicate vertex
-        std::cout << "Attempting to add duplicate vertex A." << std::endl;
-        directedUnweightedGraph.addVertex(A);
-
-        // Print vertices
-        std::cout << "Vertices in directed unweighted graph: ";
-        for (const auto &v : directedUnweightedGraph.getVertices()) {
-            std::cout << v << " ";
-        }
-        std::cout << "\n";
-
-        // Undirected and weighted graph
-        Appledore::MixedGraphMatrix<Vertex, int> undirectedWeightedGraph;
-
-        Vertex D{"D"}, E{"E"}, InvalidVertex{""};
-
-        // Test: Adding valid and invalid vertices
-        std::cout << "Adding vertices D, E, and InvalidVertex to undirected weighted graph." << std::endl;
-        try {
-            undirectedWeightedGraph.addVertex(D, E, InvalidVertex);
-        } catch (const std::invalid_argument &e) {
-            std::cout << "Caught exception: " << e.what() << "\n";
-        }
-
-        // Print vertices
-        std::cout << "Vertices in undirected weighted graph: ";
-        for (const auto &v : undirectedWeightedGraph.getVertices()) {
-            std::cout << v << " ";
-        }
-        std::cout << "\n";
-
-        // Test: Adjacency matrix resizing and integrity
-        std::cout << "Adding vertex F to undirected weighted graph." << std::endl;
-        Vertex F{"F"};
-        undirectedWeightedGraph.addVertex(F);
-
-        // Verify adjacency matrix size indirectly by adding an edge
-        std::cout << "Adding edge between D and E with weight 5." << std::endl;
-        undirectedWeightedGraph.addEdge(D, E, 5);
-        std::cout << "Edge value between D and E: "
-                  << undirectedWeightedGraph.getEdgeValue(D, E) << "\n";
-    } catch (const std::exception &ex) {
-        std::cerr << "Exception caught: " << ex.what() << std::endl;
-    }
+    std::vector<int> weightedUndirectedVertices = {10, 11, 12};
+    Appledore::MixedGraphMatrix<int, double> weightedUndirectedGraph;
+    testGraph(weightedUndirectedGraph, weightedUndirectedVertices);
 
     return 0;
 }

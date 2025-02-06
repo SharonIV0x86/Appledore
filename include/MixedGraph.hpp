@@ -12,7 +12,11 @@ namespace Appledore
     class MixedGraphMatrix : public Appledore::MatrixRepresentation
     {
     public:
-        void addVertex(const VertexType &vertex);
+        template <typename... VertexArgs>
+        void addVertex(VertexArgs&&... vertices);
+        size_t getNumVertices() const;
+        const std::map<VertexType, size_t>& getVertexToIndex() const;
+        const std::vector<VertexType>& getIndexToVertex() const;
         const std::vector<VertexType> &getVertices() const;
         bool hasEdge(const VertexType &src, const VertexType &dest) const;
         EdgeType getEdgeValue(const VertexType &src, const VertexType &dest) const;
@@ -51,21 +55,72 @@ namespace Appledore
     };
 
     template <typename VertexType, typename EdgeType>
-    void MixedGraphMatrix<VertexType, EdgeType>::addVertex(const VertexType &vertex)
-    {
-        if (vertexToIndex.count(vertex))
-        {
-            std::cout << "Vertex already exists\n";
-            return;
-        }
+    template <typename... VertexArgs>
+    void MixedGraphMatrix<VertexType, EdgeType>::addVertex(VertexArgs&&... vertices) {
+        // Helper lambda to add a single vertex
+        auto addSingleVertex = [this](auto&& vertex) {
+            try {
+                // Check if the vertex type matches the graph's VertexType
+                if constexpr (!std::is_convertible_v<std::decay_t<decltype(vertex)>, VertexType>) {
+                    std::cerr << "Vertex type mismatch: Expected " << typeid(VertexType).name() << " but got "
+                            << typeid(vertex).name() << ". Skipping addition of this vertex.\n";
+                    return;
+                }
 
-        size_t newIndex = numVertices;
-        vertexToIndex[vertex] = newIndex;
-        indexToVertex.push_back(vertex);
-        numVertices++;
+                // Check if the vertex already exists
+                if (vertexToIndex.count(vertex)) {
+                    std::cerr << "Vertex " << vertex << " already exists. Skipping.\n";
+                    return;
+                }
 
-        adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
+                const size_t old_numVertices = numVertices;
+                const size_t new_numVertices = old_numVertices + 1;
+
+                // Update vertex mappings
+                vertexToIndex[vertex] = old_numVertices;
+                indexToVertex.push_back(std::forward<decltype(vertex)>(vertex));
+
+                // Create new adjacency matrix with increased size
+                std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(new_numVertices * new_numVertices, std::nullopt);
+
+                // Copy existing elements to the new matrix
+                for (size_t row = 0; row < old_numVertices; ++row) {
+                    for (size_t col = 0; col < old_numVertices; ++col) {
+                        const size_t oldIndex = row * old_numVertices + col;
+                        const size_t newIndex = row * new_numVertices + col;
+                        newMatrix[newIndex] = std::move(adjacencyMatrix[oldIndex]);
+                    }
+                }
+
+                // Update the adjacency matrix and number of vertices
+                adjacencyMatrix = std::move(newMatrix);
+                numVertices = new_numVertices;  // Ensure numVertices is updated correctly
+
+            } catch (const std::exception& e) {
+                // Handle the exception and log the error but continue adding valid vertices
+                std::cerr << "Error adding vertex " << vertex << ": " << e.what() << "\n";
+            }
+        };
+
+        // Process each vertex in the parameter pack
+        (addSingleVertex(std::forward<VertexArgs>(vertices)), ...);
     }
+
+    template <typename VertexType, typename EdgeType>
+    size_t Appledore::MixedGraphMatrix<VertexType, EdgeType>::getNumVertices() const {
+        return numVertices;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    const std::map<VertexType, size_t>& MixedGraphMatrix<VertexType, EdgeType>::getVertexToIndex() const {
+        return vertexToIndex;
+    }
+
+    template <typename VertexType, typename EdgeType>
+    const std::vector<VertexType>& MixedGraphMatrix<VertexType, EdgeType>::getIndexToVertex() const {
+        return indexToVertex;
+    }
+
 
     template <typename VertexType, typename EdgeType>
     EdgeType MixedGraphMatrix<VertexType, EdgeType>::getEdgeValue(const VertexType &src, const VertexType &dest) const
