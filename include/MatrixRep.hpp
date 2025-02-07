@@ -63,11 +63,13 @@ namespace Appledore
     public:
         size_t __id_;
         static size_t nextId;
-        std::string e_name;
+        std::string __e___name;
         GraphEdge()
         {
             __id_ = nextId++;
+            __e___name = __generate_vertex_name();
         }
+        GraphEdge(std::string edge_name): __e___name{edge_name}{};
 
         bool operator<(const GraphEdge &other) const
         {
