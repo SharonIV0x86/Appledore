@@ -613,16 +613,21 @@ namespace Appledore
                 adjacencyMatrix[getIndex(destIndex, srcIndex)] = EdgeInfo<EdgeType>(newEdgeValue);
             }
         }
-        bool isCyclicDirectedDFS(size_t v, std::vector<bool> &visited, std::vector<bool> &recStack) const {
+        bool isCyclicDirectedDFS(const size_t v, std::vector<bool> &visited, std::vector<bool> &recStack) const {
             visited[v] = true;
             recStack[v] = true;
 
             for (size_t dest = 0; dest < numVertices; ++dest) {
-                if (adjacencyMatrix[getIndex(v, dest)].has_value()) {
-                    if (!visited[dest] && isCyclicDirectedDFS(dest, visited, recStack))
+                if (!adjacencyMatrix[getIndex(v, dest)].has_value()) {
+                    continue;
+                }
+
+                if (!visited[dest]) {
+                    if (isCyclicDirectedDFS(dest, visited, recStack)) {
                         return true;
-                    if (recStack[dest])
-                        return true;
+                    }
+                } else if (recStack[dest]) {
+                    return true;
                 }
             }
 
@@ -634,13 +639,16 @@ namespace Appledore
             visited[v] = true;
 
             for (size_t dest = 0; dest < numVertices; ++dest) {
-                if (adjacencyMatrix[getIndex(v, dest)].has_value()) {
-                    if (!visited[dest]) {
-                        if (isCyclicUndirectedDFS(dest, v, visited))
-                            return true;
-                    } else if (dest != parent) {
+                if (!adjacencyMatrix[getIndex(v, dest)].has_value()) {
+                    continue;
+                }
+
+                if (!visited[dest]) {
+                    if (isCyclicUndirectedDFS(dest, v, visited)) {
                         return true;
                     }
+                } else if (dest != parent) {
+                    return true;
                 }
             }
             return false;
@@ -652,13 +660,21 @@ namespace Appledore
             if (isDirected) {
                 std::vector<bool> recStack(numVertices, false);
                 for (size_t i = 0; i < numVertices; ++i) {
-                    if (!visited[i] && isCyclicDirectedDFS(i, visited, recStack))
+                    if (visited[i]) {
+                        continue;
+                    }
+                    if (isCyclicDirectedDFS(i, visited, recStack)) {
                         return true;
+                    }
                 }
             } else {
                 for (size_t i = 0; i < numVertices; ++i) {
-                    if (!visited[i] && isCyclicUndirectedDFS(i, -1, visited))
+                    if (visited[i]) {
+                        continue;
+                    }
+                    if (isCyclicUndirectedDFS(i, -1, visited)) {
                         return true;
+                    }
                 }
             }
 
