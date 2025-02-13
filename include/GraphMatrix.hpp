@@ -8,60 +8,18 @@
 #include <stack>
 #include <algorithm>
 #include <set>
-
+#include "MatrixRep.hpp"
 namespace Appledore
 {
-    // Tag structures
-    struct DirectedG
-    {
-    };
-    struct UndirectedG
-    {
-    };
-    struct UnweightedG
-    {
-    };
-    class GraphVertex
-    {
-    public:
-        size_t id;
-        static size_t nextId;
-
-        GraphVertex()
-        {
-            id = nextId++;
-        }
-
-        bool operator<(const GraphVertex &other) const
-        {
-            return id < other.id;
-        }
-
-        bool operator==(const GraphVertex &other) const
-        {
-            return id == other.id;
-        }
-    };
-    
-    size_t Appledore::GraphVertex::nextId = 1;
-    
-    template <typename EdgeType>
-    struct EdgeInfo
-    {
-        EdgeType value;
-
-        EdgeInfo(const EdgeType &value) : value(value) {}
-        EdgeInfo() {}
-    };
 
     // GraphMatrix class template
     template <typename VertexType, typename EdgeType, typename Direction>
-    class GraphMatrix
+    class GraphMatrix: public Appledore::MatrixRepresentation
     {
     public:
         GraphMatrix()
             : isDirected(std::is_same_v<Direction, DirectedG>),
-            isWeighted(!std::is_same_v<EdgeType, UnweightedG>) {}
+              isWeighted(!std::is_same_v<EdgeType, UnweightedG>) {}
 
         template <typename... Vertices>
         void addVertex(Vertices &&...vertices)
@@ -194,9 +152,10 @@ namespace Appledore
 
         // Get all edges
         std::vector<std::tuple<VertexType, VertexType, EdgeType>> getAllEdges(
-     std::optional<bool> returnSorted = std::nullopt,
-     std::function<bool(const std::tuple<VertexType, VertexType, EdgeType>&,
-                        const std::tuple<VertexType, VertexType, EdgeType>&)> customPredicate = nullptr) const
+            std::optional<bool> returnSorted = std::nullopt,
+            std::function<bool(const std::tuple<VertexType, VertexType, EdgeType> &,
+                               const std::tuple<VertexType, VertexType, EdgeType> &)>
+                customPredicate = nullptr) const
         {
             if (!isWeighted)
                 throw std::invalid_argument("Given Graph must be Weighted.");
@@ -207,7 +166,7 @@ namespace Appledore
             {
                 for (size_t destIndex = 0; destIndex < numVertices; ++destIndex)
                 {
-                    const auto& edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
+                    const std::optional<EdgeInfo<EdgeType>> &edgeValue = adjacencyMatrix[getIndex(srcIndex, destIndex)];
                     if (edgeValue.has_value())
                     {
                         edges.emplace_back(
@@ -218,35 +177,38 @@ namespace Appledore
                 }
             }
 
-            // Check if EdgeType is arithmetic
             constexpr bool isArithmetic = std::is_arithmetic_v<EdgeType>;
+
+            if (!returnSorted.has_value() && customPredicate == nullptr)
+            {
+                // If no sorting is required, return the edges as is
+                return edges;
+            }
 
             if (customPredicate)
             {
-                // Custom sorting logic
+                // Use custom predicate for sorting
                 std::sort(edges.begin(), edges.end(), customPredicate);
             }
             else if (returnSorted.has_value())
             {
+                // Check if EdgeType is arithmetic for automatic sorting
                 if (!isArithmetic)
                 {
                     throw std::invalid_argument("Automatic sorting requires EdgeType to be arithmetic.");
                 }
-                // Sort in ascending or descending order
+
+                // Automatic sorting in ascending or descending order
                 std::sort(edges.begin(), edges.end(),
-                          [returnSorted](const auto& a, const auto& b) {
+                          [returnSorted](const auto &a, const auto &b)
+                          {
                               return returnSorted.value() ? (std::get<2>(a) < std::get<2>(b))
                                                           : (std::get<2>(a) > std::get<2>(b));
                           });
             }
-            else if (!isArithmetic)
-            {
-                throw std::invalid_argument("EdgeType must be arithmetic to return edges without sorting.");
-            }
 
             return edges;
         }
-
 
         // Get indegree for a vertex
         [[nodiscard]] size_t indegree(const VertexType &vertex) const
@@ -394,13 +356,15 @@ namespace Appledore
                         {
                             VertexType nextVertex = indexToVertex[i];
                             bool vertexInPath = false;
-                            for (const auto& pathVertex : currentPath) {
-                                if (pathVertex.id == nextVertex.id) {
+                            for (const auto &pathVertex : currentPath)
+                            {
+                                if (pathVertex.id == nextVertex.id)
+                                {
                                     vertexInPath = true;
                                     break;
                                 }
                             }
-                            
+
                             if (!vertexInPath)
                             {
                                 auto newPath = currentPath;
@@ -418,19 +382,24 @@ namespace Appledore
         // Calculate the density of the graph
         // For undirected graphs: density = (2 * |E|) / (|V| * (|V| - 1))
         // For directed graphs: density = |E| / (|V| * (|V| - 1))
-        [[nodiscard]] double density() const {
-            if (numVertices <= 1) {
+        [[nodiscard]] double density() const
+        {
+            if (numVertices <= 1)
+            {
                 return 0.0;
             }
 
             size_t edgeCount = 0;
-            for (size_t i = 0; i < adjacencyMatrix.size(); ++i) {
-                if (adjacencyMatrix[i].has_value()) {
+            for (size_t i = 0; i < adjacencyMatrix.size(); ++i)
+            {
+                if (adjacencyMatrix[i].has_value())
+                {
                     edgeCount++;
                 }
             }
 
-            if (!isDirected) {
+            if (!isDirected)
+            {
                 edgeCount /= 2;
             }
 
@@ -448,7 +417,8 @@ namespace Appledore
                 return false;
             std::vector<bool> visited(numVertices, false);
             dfsforConnectivity(0, visited);
-            return std::all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+            return std::all_of(visited.begin(), visited.end(), [](bool v)
+                               { return v; });
         }
 
         // ---------------------------------------------------------
@@ -491,13 +461,15 @@ namespace Appledore
                         {
                             VertexType nextVertex = indexToVertex[i];
                             bool vertexInPath = false;
-                            for (const auto& pathVertex : currentPath) {
-                                if (pathVertex.id == nextVertex.id) {
+                            for (const auto &pathVertex : currentPath)
+                            {
+                                if (pathVertex.id == nextVertex.id)
+                                {
                                     vertexInPath = true;
                                     break;
                                 }
                             }
-                            
+
                             if (!vertexInPath)
                             {
                                 auto newPath = currentPath;
@@ -540,20 +512,25 @@ namespace Appledore
         // ---------------------------------------------------------
         // NEW METHOD: removeVertex()
         // ---------------------------------------------------------
-        void removeVertex(const VertexType &vert) {
+        void removeVertex(const VertexType &vert)
+        {
 
-            if (!vertexToIndex.count(vert)) {
+            if (!vertexToIndex.count(vert))
+            {
                 throw std::invalid_argument("Vertex does not exist in the graph.");
             }
 
             size_t remIdx = vertexToIndex[vert];
             size_t lastIdx = numVertices - 1;
 
-            if (remIdx != lastIdx) {
-                for (size_t c = 0; c < numVertices; ++c) {
+            if (remIdx != lastIdx)
+            {
+                for (size_t c = 0; c < numVertices; ++c)
+                {
                     std::swap(adjacencyMatrix[getIndex(remIdx, c)], adjacencyMatrix[getIndex(lastIdx, c)]);
                 }
-                for (size_t r = 0; r < numVertices; ++r) {
+                for (size_t r = 0; r < numVertices; ++r)
+                {
                     std::swap(adjacencyMatrix[getIndex(r, remIdx)], adjacencyMatrix[getIndex(r, lastIdx)]);
                 }
 
@@ -568,8 +545,10 @@ namespace Appledore
             size_t newSize = (numVertices - 1) * (numVertices - 1);
             std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(newSize);
 
-            for (size_t r = 0; r < numVertices - 1; ++r) {
-                for (size_t c = 0; c < numVertices - 1; ++c) {
+            for (size_t r = 0; r < numVertices - 1; ++r)
+            {
+                for (size_t c = 0; c < numVertices - 1; ++c)
+                {
                     newMatrix[r * (numVertices - 1) + c] = adjacencyMatrix[getIndex(r, c)];
                 }
             }
