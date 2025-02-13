@@ -8,7 +8,10 @@
 #include <stack>
 #include <algorithm>
 #include <set>
+#include <queue>
+#include <limits>
 #include "MatrixRep.hpp"
+
 namespace Appledore
 {
 
@@ -508,6 +511,38 @@ namespace Appledore
                 }
             }
         }
+
+        std::map<VertexType, EdgeType> bfs(VertexType& startVertex, size_t maxDepth) {
+            size_t start = vertexToIndex[startVertex];
+            EdgeType inf = std::numeric_limits<EdgeType>::infinity();
+            std::map<VertexType, EdgeType> dist;
+            
+            for (size_t i = 0; i < numVertices; i++) {
+                dist[indexToVertex[i]] = inf;
+            }
+
+            dist[startVertex] = 0;
+
+            std::queue<VertexType> queue;
+            queue.push(indexToVertex[start]);
+            size_t depth = 0;
+
+            while (!queue.empty() && depth <= maxDepth) {
+                VertexType current = queue.front();
+                queue.pop();
+                depth = dist[current];
+
+                for (VertexType neighbor : getNeighbors(current)) {
+                    EdgeType weight = getEdge(current, neighbor);
+                    
+                    if (dist[neighbor] == inf) {
+                        dist[neighbor] = dist[current] + weight;
+                        queue.push(neighbor);
+                    }
+                }
+            }
+            return dist;
+        }; 
 
         // ---------------------------------------------------------
         // NEW METHOD: removeVertex()

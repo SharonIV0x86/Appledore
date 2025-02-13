@@ -56,6 +56,11 @@ namespace Appledore
         {
             return __id_ == other.__id_;
         }
+
+        friend std::ostream& operator<<(std::ostream& src, const GraphVertex& other) {
+            src << "Vertex " << other.id;
+            return src;
+        }
     };
     size_t Appledore::GraphVertex::nextId = 1;
     class GraphEdge
