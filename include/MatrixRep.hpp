@@ -85,6 +85,7 @@ namespace Appledore
         }
     };
     size_t Appledore::GraphEdge::nextId = 1;
+    template<typename VertexType, typename EdgeType>
     class MatrixRepresentation
     {
         // common methods.
