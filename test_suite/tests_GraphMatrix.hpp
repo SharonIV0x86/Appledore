@@ -3,6 +3,7 @@
 #include <vector>
 #include "../include/GraphMatrix.hpp"
 #include "graph_types.hpp"
+#include <format>
 using namespace Appledore;
 
 namespace Appledore
@@ -10,10 +11,10 @@ namespace Appledore
     // testing class with custom vertex and edge types.
     class C_TestGraphMatrix
     {
-        std::set<custom_vertex_1<std::string>> true_value_getNeighbors_v8;
-        size_t true_value_totalDegree_v8;
 
     public:
+        size_t true_value_totalDegree_v8;
+        std::set<custom_vertex_1<std::string>> true_value_getNeighbors_v8;
         GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> ggraph;
         custom_vertex_1<std::string> v1;
         custom_vertex_1<std::string> v2;
@@ -29,6 +30,13 @@ namespace Appledore
             : v1("vertex_1", true), v2("vertex_2", true), v3("vertex_3", true), v4("vertex_4", true),
               v5("vertex_5", true), v6("vertex_6", true), v7("vertex_7", true), v8("vertex_8", true) {}
 
+        std::vector<std::pair<custom_vertex_1<std::string>, custom_vertex_1<std::string>>> true_edges = {
+                        {v1, v2}, {v1, v4}, {v1, v8}, 
+                        {v2, v3}, 
+                        {v3, v7}, {v3, v8}, 
+                        {v8, v5}, {v8, v6}, 
+                        {v6, v7}};
+        std::vector<custom_vertex_1<std::string>> true_vertex_vector = {v1,v2,v3,v4,v5,v6,v7,v8};
         GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> create_graph()
         {
             ggraph.addVertex(v1, v2, v3, v4, v5, v6, v7, v8);
@@ -58,169 +66,71 @@ namespace Appledore
 
             return ggraph;
         }
-        bool test_totalDegree()
+        void test_totalDegree()
         {
             size_t observed_value = ggraph.totalDegree(v8);
             if (observed_value == true_value_totalDegree_v8)
-            {
-                return true;
-            }
+                printColoredText("✔ test_totalDegree() PASSED!", ANSI_COLOR_GREEN);
             else
-            {
-                return false;
-            }
+                printColoredText(std::format("✘ test_totalDegree() FAILED! \n\t Expected: {}, Got: {}", observed_value, true_value_totalDegree_v8), ANSI_COLOR_RED);
         }
-        bool test_getNeighbors()
+        void test_getNeighbors()
         {
             auto observed_value = ggraph.getNeighbors(v8);
             if (observed_value == true_value_getNeighbors_v8)
-            {
-                return true;
-            }
+                printColoredText("✔ test_getNeighbors() PASSED!", ANSI_COLOR_GREEN);
             else
-            {
-                return false;
-            }
+                printColoredText("✘ test_getNeighbors() FAILED!", ANSI_COLOR_RED);
         }
-        bool test_hasEdge()
+        void test_hasEdge()
         {
-            if (!ggraph.hasEdge(v1, v2) || !ggraph.hasEdge(v1, v4) ||
-                !ggraph.hasEdge(v1, v8))
+            bool all_passed = true;
+
+            for (const auto &edge : true_edges)
             {
-                return false;
+                if (!ggraph.hasEdge(edge.first, edge.second))
+                {
+                    printColoredText(std::format("✘ test_hasEdge() FAILED! \n\tIncorrect edge: {} -> {}", edge.first.get_vertex_name(), edge.second.get_vertex_name()), ANSI_COLOR_RED);
+                    return;
+                }
             }
 
-            if (!ggraph.hasEdge(v2, v3))
+            if (all_passed)
             {
-                return false;
+                printColoredText("✔ test_hasEdge() PASSED!", ANSI_COLOR_GREEN);
             }
-            if (!ggraph.hasEdge(v3, v7) || !ggraph.hasEdge(v3, v8))
-            {
-                return false;
-            }
-            if (!ggraph.hasEdge(v8, v5) || !ggraph.hasEdge(v8, v6))
-            {
-                return false;
-            }
-            if (!ggraph.hasEdge(v6, v7))
-            {
-                return false;
-            }
-            return true;
         }
-        bool test_getVertices()
+
+        void test_getVertices()
         {
             std::vector<custom_vertex_1<std::string>> vertices = ggraph.getVertices();
-
-            if (std::find(vertices.begin(), vertices.end(), v1) == vertices.end())
+            bool all_passed = true;
+            std::vector<custom_vertex_1<std::string>> true_vertices = {v1, v2, v3, v4, v5, v6, v7, v8};
+            for (const auto &v : true_vertices)
             {
-                return false;
+                if (std::find(vertices.begin(), vertices.end(), v) == vertices.end())
+                {
+                    printColoredText(std::format("✘ test_getVertices() FAILED! \n\tGot: {} ", v.get_vertex_name()), ANSI_COLOR_RED);
+                    return;
+                }
             }
-
-            if (std::find(vertices.begin(), vertices.end(), v2) == vertices.end())
-            {
-                return false;
-            }
-
-            if (std::find(vertices.begin(), vertices.end(), v3) == vertices.end())
-            {
-                return false;
-            }
-
-            if (std::find(vertices.begin(), vertices.end(), v4) == vertices.end())
-            {
-                return false;
-            }
-
-            if (std::find(vertices.begin(), vertices.end(), v5) == vertices.end())
-            {
-                return false;
-            }
-
-            if (std::find(vertices.begin(), vertices.end(), v6) == vertices.end())
-            {
-                return false;
-            }
-
-            if (std::find(vertices.begin(), vertices.end(), v7) == vertices.end())
-            {
-                return false;
-            }
-
-            if (std::find(vertices.begin(), vertices.end(), v8) == vertices.end())
-            {
-                return false;
-            }
-            return true;
+            printColoredText("✔ test_getVertices() PASSED!", ANSI_COLOR_GREEN);
         }
         void init_tests()
         {
-            // testing totalDegree()
-            if (!test_totalDegree())
-            {
-                std::cout << "test_totalDegree() -->    ";
-                printColoredText("FAILED\n", ANSI_COLOR_RED);
-            }
-            else
-            {
-                std::cout << "test_totalDegree() -->      ";
-                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
-            }
-            // testing getNeighbors
-            if (!test_getNeighbors())
-            {
-                std::cout << "test_getNeighbors() -->   ";
-                printColoredText("FAILED\n", ANSI_COLOR_RED);
-            }
-            else
-            {
-                std::cout << "test_getNeighbors() --> ";
-                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
-            }
-            if (!test_hasEdge())
-            {
-                std::cout << "test_hasEdge() ";
-                printColoredText("FAILED\n", ANSI_COLOR_RED);
-            }
-            else
-            {
-                std::cout << "test_hasEdge() --> ";
-                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
-            }
-            if(!test_getVertices()){
-                std::cout << "test_getVertices() --> ";
-                printColoredText("FAILED\n", ANSI_COLOR_RED);
-            }else{
-                std::cout << "test_getVertices() --> ";
-                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
-
-            }
+            test_totalDegree();
+            test_getNeighbors();
+            test_hasEdge();
+            test_getVertices();
         }
         void show_vertex_data()
         {
-            std::cout << "\nVertex 1 data: ";
-            v1.show_random_data();
-
-            std::cout << "\nVertex 2 data: ";
-            v2.show_random_data();
-
-            std::cout << "\nVertex 3 data: ";
-            v3.show_random_data();
-
-            std::cout << "\nVertex 4 data: ";
-            v4.show_random_data();
-
-            std::cout << "\nVertex 5 data: ";
-            v5.show_random_data();
-
-            std::cout << "\nVertex 6 data: ";
-            v6.show_random_data();
-
-            std::cout << "\nVertex 7 data: ";
-            v7.show_random_data();
-
-            std::cout << "\nVertex 8 data: ";
-            v8.show_random_data();
+            printColoredText("\nShowing Vertex data \n", ANSI_COLOR_YELLOW);
+            for(const auto& vert: true_vertex_vector){
+                // std::cout << "\t";
+                vert.show_random_data();
+                std::cout << "\n";
+            }
         }
     };
 }

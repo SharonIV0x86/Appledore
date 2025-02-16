@@ -6,10 +6,10 @@ int main(int argc, char *argv[])
 {
     if (argc > 1 && std::string(argv[1]) == "graph-matrix")
     {
-        C_TestGraphMatrix test1;
-        test1.create_graph();
-        test1.init_tests();
-        test1.show_vertex_data();
+        Appledore::C_TestGraphMatrix tester;
+        tester.create_graph();
+        tester.init_tests();
+        tester.show_vertex_data();
     }
     else
     {
