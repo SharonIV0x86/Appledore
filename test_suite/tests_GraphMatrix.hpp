@@ -1,115 +1,226 @@
 #include <iostream>
-#include <set>
+#include <random>
 #include <vector>
-#include <cassert>
 #include "../include/GraphMatrix.hpp"
 #include "graph_types.hpp"
-
 using namespace Appledore;
 
-
-namespace Appledore {
-    class C_TestGraphMatrix {
-        std::set<custom_vertex_1<std::string>> expected_neighbors_v8;
-        size_t expected_degree_v8;
+namespace Appledore
+{
+    // testing class with custom vertex and edge types.
+    class C_TestGraphMatrix
+    {
+        std::set<custom_vertex_1<std::string>> true_value_getNeighbors_v8;
+        size_t true_value_totalDegree_v8;
 
     public:
         GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> ggraph;
-        std::vector<custom_vertex_1<std::string>> vertices;
+        custom_vertex_1<std::string> v1;
+        custom_vertex_1<std::string> v2;
+        custom_vertex_1<std::string> v3;
+        custom_vertex_1<std::string> v4;
+        custom_vertex_1<std::string> v5;
+        custom_vertex_1<std::string> v6;
+        custom_vertex_1<std::string> v7;
+        custom_vertex_1<std::string> v8;
 
+        // Constructor to initialize the vertices and the graph
         C_TestGraphMatrix()
-            : vertices{
-                  custom_vertex_1<std::string>("vertex_1", true),
-                  custom_vertex_1<std::string>("vertex_2", true),
-                  custom_vertex_1<std::string>("vertex_3", true),
-                  custom_vertex_1<std::string>("vertex_4", true),
-                  custom_vertex_1<std::string>("vertex_5", true),
-                  custom_vertex_1<std::string>("vertex_6", true),
-                  custom_vertex_1<std::string>("vertex_7", true),
-                  custom_vertex_1<std::string>("vertex_8", true)} {}
+            : v1("vertex_1", true), v2("vertex_2", true), v3("vertex_3", true), v4("vertex_4", true),
+              v5("vertex_5", true), v6("vertex_6", true), v7("vertex_7", true), v8("vertex_8", true) {}
 
-        void create_graph() {
-            for (auto &v : vertices) ggraph.addVertex(v);
+        GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> create_graph()
+        {
+            ggraph.addVertex(v1, v2, v3, v4, v5, v6, v7, v8);
 
-            std::vector<std::tuple<int, int, int>> edges = {
-                {0, 1, 6}, {0, 3, 19}, {0, 7, 31},
-                {1, 2, 12}, {2, 6, 46}, {2, 7, 48},
-                {7, 4, 27}, {7, 5, 92}, {5, 6, 38}};
+            ggraph.addEdge(v1, v2, 6);
+            ggraph.addEdge(v1, v4, 19);
+            ggraph.addEdge(v1, v8, 31);
 
-            for (auto &[i, j, weight] : edges)
-                ggraph.addEdge(vertices[i], vertices[j], weight);
+            ggraph.addEdge(v2, v3, 12);
 
-            expected_neighbors_v8 = {vertices[0], vertices[2], vertices[4], vertices[5]};
-            expected_degree_v8 = expected_neighbors_v8.size();
+            ggraph.addEdge(v3, v7, 46);
+            ggraph.addEdge(v3, v8, 48);
+
+            ggraph.addEdge(v8, v5, 27);
+            ggraph.addEdge(v8, v6, 92);
+
+            ggraph.addEdge(v6, v7, 38);
+
+            // populating true_value_vert_neighbors set.
+            true_value_getNeighbors_v8.insert(v1);
+            true_value_getNeighbors_v8.insert(v3);
+            true_value_getNeighbors_v8.insert(v5);
+            true_value_getNeighbors_v8.insert(v6);
+
+            // setting known true value of total degree for one vertex v8.
+            true_value_totalDegree_v8 = 4;
+
+            return ggraph;
         }
-
-        void test_totalDegree() {
-            size_t observed = ggraph.totalDegree(vertices[7]);
-            if (observed == expected_degree_v8) {
-                printColoredText("✔ totalDegree() passed!", ANSI_COLOR_GREEN);
-            } else {
-                printColoredText("✘ totalDegree() failed! Expected: " + std::to_string(expected_degree_v8) + ", Got: " + std::to_string(observed), ANSI_COLOR_RED);
+        bool test_totalDegree()
+        {
+            size_t observed_value = ggraph.totalDegree(v8);
+            if (observed_value == true_value_totalDegree_v8)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
-
-        void test_getNeighbors() {
-            auto observed = ggraph.getNeighbors(vertices[7]);
-            if (observed == expected_neighbors_v8) {
-                printColoredText("✔ getNeighbors() passed!", ANSI_COLOR_GREEN);
-            } else {
-                std::string msg = "✘ getNeighbors() failed! Expected: { ";
-                for (const auto &v : expected_neighbors_v8) msg += v.get_vertex_name() + " ";
-                msg += "}, Got: { ";
-                for (const auto &v : observed) msg += v.get_vertex_name() + " ";
-                msg += "}";
-                printColoredText(msg, ANSI_COLOR_RED);
+        bool test_getNeighbors()
+        {
+            auto observed_value = ggraph.getNeighbors(v8);
+            if (observed_value == true_value_getNeighbors_v8)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
-
-        void test_hasEdge() {
-            bool all_passed = true;
-            std::vector<std::tuple<int, int>> expected_edges = {
-                {0, 1}, {0, 3}, {0, 7}, {1, 2}, {2, 6}, {2, 7}, {7, 4}, {7, 5}, {5, 6}};
-
-            for (auto &[i, j] : expected_edges) {
-                if (!ggraph.hasEdge(vertices[i], vertices[j])) {
-                    printColoredText("✘ hasEdge() failed for edge (" + vertices[i].get_vertex_name() + ", " + vertices[j].get_vertex_name() + ")", ANSI_COLOR_RED);
-                    all_passed = false;
-                }
+        bool test_hasEdge()
+        {
+            if (!ggraph.hasEdge(v1, v2) || !ggraph.hasEdge(v1, v4) ||
+                !ggraph.hasEdge(v1, v8))
+            {
+                return false;
             }
 
-            if (all_passed) {
-                printColoredText("✔ hasEdge() passed for all edges!", ANSI_COLOR_GREEN);
+            if (!ggraph.hasEdge(v2, v3))
+            {
+                return false;
+            }
+            if (!ggraph.hasEdge(v3, v7) || !ggraph.hasEdge(v3, v8))
+            {
+                return false;
+            }
+            if (!ggraph.hasEdge(v8, v5) || !ggraph.hasEdge(v8, v6))
+            {
+                return false;
+            }
+            if (!ggraph.hasEdge(v6, v7))
+            {
+                return false;
+            }
+            return true;
+        }
+        bool test_getVertices()
+        {
+            std::vector<custom_vertex_1<std::string>> vertices = ggraph.getVertices();
+
+            if (std::find(vertices.begin(), vertices.end(), v1) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v2) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v3) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v4) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v5) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v6) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v7) == vertices.end())
+            {
+                return false;
+            }
+
+            if (std::find(vertices.begin(), vertices.end(), v8) == vertices.end())
+            {
+                return false;
+            }
+            return true;
+        }
+        void init_tests()
+        {
+            // testing totalDegree()
+            if (!test_totalDegree())
+            {
+                std::cout << "test_totalDegree() -->    ";
+                printColoredText("FAILED\n", ANSI_COLOR_RED);
+            }
+            else
+            {
+                std::cout << "test_totalDegree() -->      ";
+                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+            }
+            // testing getNeighbors
+            if (!test_getNeighbors())
+            {
+                std::cout << "test_getNeighbors() -->   ";
+                printColoredText("FAILED\n", ANSI_COLOR_RED);
+            }
+            else
+            {
+                std::cout << "test_getNeighbors() --> ";
+                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+            }
+            if (!test_hasEdge())
+            {
+                std::cout << "test_hasEdge() ";
+                printColoredText("FAILED\n", ANSI_COLOR_RED);
+            }
+            else
+            {
+                std::cout << "test_hasEdge() --> ";
+                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+            }
+            if(!test_getVertices()){
+                std::cout << "test_getVertices() --> ";
+                printColoredText("FAILED\n", ANSI_COLOR_RED);
+            }else{
+                std::cout << "test_getVertices() --> ";
+                printColoredText("PASSED\n", ANSI_COLOR_GREEN);
+
             }
         }
-        void show_vertex_data(){
-            for(const auto& v: vertices){
-                v.show_random_data();
-            }
-        }
-        void test_getVertices() {
-            auto observed = ggraph.getVertices();
-            std::set<custom_vertex_1<std::string>> observed_set(observed.begin(), observed.end());
-            std::set<custom_vertex_1<std::string>> expected_set(vertices.begin(), vertices.end());
+        void show_vertex_data()
+        {
+            std::cout << "\nVertex 1 data: ";
+            v1.show_random_data();
 
-            if (observed_set == expected_set) {
-                printColoredText("✔ getVertices() passed!", ANSI_COLOR_GREEN);
-            } else {
-                std::string msg = "✘ getVertices() failed! Expected: { ";
-                for (const auto &v : expected_set) msg += v.get_vertex_name() + " ";
-                msg += "}, Got: { ";
-                for (const auto &v : observed_set) msg += v.get_vertex_name() + " ";
-                msg += "}";
-                printColoredText(msg, ANSI_COLOR_RED);
-            }
-        }
+            std::cout << "\nVertex 2 data: ";
+            v2.show_random_data();
 
-        void run_tests() {
-            test_totalDegree();
-            test_getNeighbors();
-            test_hasEdge();
-            test_getVertices();
-            printColoredText("✅ All tests completed!", ANSI_COLOR_GREEN);
+            std::cout << "\nVertex 3 data: ";
+            v3.show_random_data();
+
+            std::cout << "\nVertex 4 data: ";
+            v4.show_random_data();
+
+            std::cout << "\nVertex 5 data: ";
+            v5.show_random_data();
+
+            std::cout << "\nVertex 6 data: ";
+            v6.show_random_data();
+
+            std::cout << "\nVertex 7 data: ";
+            v7.show_random_data();
+
+            std::cout << "\nVertex 8 data: ";
+            v8.show_random_data();
         }
     };
 }
