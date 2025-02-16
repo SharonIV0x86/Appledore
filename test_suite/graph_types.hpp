@@ -17,7 +17,7 @@ namespace Appledore
     // string_view provides a lightweight object that offers read-only access to a string or a part of a string
     inline void printColoredText(std::string text, std::string_view colorCode)
     {
-        std::cout << colorCode << text << ANSI_COLOR_RESET << "\n";
+        std::cout << colorCode << text << ANSI_COLOR_RESET;
     }
     template <typename type_store_data>
     class custom_vertex_1 : public GraphVertex
@@ -46,17 +46,16 @@ namespace Appledore
                     random_data.push_back(i + 1);
             }
         }
-        [[nodiscard]] type_store_data get_vertex_name() const
+        [[nodiscard]] type_store_data get_vertex_name()
         {
             return vertex_name;
         }
-        void show_random_data() const
+        void show_random_data()
         {
             for (const auto &ae : random_data)
             {
                 std::cout << ae << " ";
             }
-            std::cout << "\n";
         }
     };
     template <typename weight_type>
