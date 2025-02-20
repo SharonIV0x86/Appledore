@@ -680,6 +680,36 @@ namespace Appledore
 
             return false;
         }
+        void bfs(size_t start, std::vector<float>& dist, size_t maxDepth = numVertices){
+            if (start >= numVertices) {
+                throw std::out_of_range("Start vertex index is out of range");
+            }
+    
+           std::queue<size_t> q;
+           std::vector<bool> visited(numVertices, false);
+    
+            q.push(start);
+           visited[start] = true;
+           dist[start] = 0;
+    
+           while (!q.empty()) {
+               size_t current = q.front();
+              q.pop();
+        
+              if (dist[current] >= maxDepth) {
+                   continue;
+             }
+        
+              for (size_t neighbor = 0; neighbor < numVertices; ++neighbor) {
+                  if (adjacencyMatrix[getIndex(current, neighbor)].has_value() && !visited[neighbor]) {
+                       visited[neighbor] = true;
+                       dist[neighbor] = dist[current] + 1;
+                       q.push(neighbor);
+                   }
+              }
+           }
+        }
+
 
     private:
         std::map<VertexType, size_t> vertexToIndex;
