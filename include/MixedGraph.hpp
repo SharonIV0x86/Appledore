@@ -9,7 +9,7 @@
 namespace Appledore
 {
     template <typename VertexType, typename EdgeType = bool>
-    class MixedGraphMatrix : public Appledore::MatrixRepresentation
+    class MixedGraphMatrix : public Appledore::MatrixRepresentation<VertexType, EdgeType>
     {
     public:
         void addVertex(const VertexType &vertex);

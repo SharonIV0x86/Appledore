@@ -14,7 +14,7 @@ namespace Appledore
 
     // GraphMatrix class template
     template <typename VertexType, typename EdgeType, typename Direction>
-    class GraphMatrix: public Appledore::MatrixRepresentation
+    class GraphMatrix: public Appledore::MatrixRepresentation<VertexType, EdgeType>
     {
     public:
         GraphMatrix()
@@ -181,24 +181,20 @@ namespace Appledore
 
             if (!returnSorted.has_value() && customPredicate == nullptr)
             {
-                // If no sorting is required, return the edges as is
                 return edges;
             }
 
             if (customPredicate)
             {
-                // Use custom predicate for sorting
                 std::sort(edges.begin(), edges.end(), customPredicate);
             }
             else if (returnSorted.has_value())
             {
-                // Check if EdgeType is arithmetic for automatic sorting
                 if (!isArithmetic)
                 {
                     throw std::invalid_argument("Automatic sorting requires EdgeType to be arithmetic.");
                 }
 
-                // Automatic sorting in ascending or descending order
                 std::sort(edges.begin(), edges.end(),
                           [returnSorted](const auto &a, const auto &b)
                           {
@@ -210,7 +206,6 @@ namespace Appledore
             return edges;
         }
 
-        // Get indegree for a vertex
         [[nodiscard]] size_t indegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
@@ -233,7 +228,6 @@ namespace Appledore
             }
             return indegree;
         }
-        // Get outdegree for a vertex
         [[nodiscard]] size_t outdegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
@@ -256,7 +250,6 @@ namespace Appledore
             }
             return outdegree;
         }
-        // Get totalDegree for a vertex
         [[nodiscard]] size_t totalDegree(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
@@ -276,7 +269,6 @@ namespace Appledore
             }
             return totaldegree;
         }
-        // Get neighbors for a vertex
         std::set<VertexType> getNeighbors(const VertexType &vertex) const
         {
             if (!vertexToIndex.count(vertex))
@@ -286,7 +278,6 @@ namespace Appledore
 
             size_t vertexIndex = vertexToIndex.at(vertex);
 
-            // Using a set to store neighbors
             std::set<VertexType> neighbors;
 
             for (size_t destIndex = 0; destIndex < numVertices; ++destIndex)
@@ -296,7 +287,6 @@ namespace Appledore
                     neighbors.insert(indexToVertex[destIndex]);
                 }
 
-                // Check reverse direction only if the graph is undirected
                 if (!isDirected && adjacencyMatrix[getIndex(destIndex, vertexIndex)].has_value())
                 {
                     neighbors.insert(indexToVertex[destIndex]);
@@ -306,8 +296,6 @@ namespace Appledore
             return neighbors;
         }
 
-        // find all paths b/w two vertices
-        // Modifying the findAllPaths method, adding the pathLimit parameter
         std::vector<std::vector<VertexType>> findAllPaths(const VertexType &src, const VertexType &dest, size_t pl = 0)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
@@ -316,7 +304,6 @@ namespace Appledore
             if (pl < 0)
                 throw std::invalid_argument("Path limit must be a non-negative integer!");
 
-            // Compute the total number of paths only if the user specified a limit, this optimizes the performance.
             if (pl > 0)
             {
                 size_t totalPaths = countPathsDFS(src, dest);
@@ -341,7 +328,6 @@ namespace Appledore
                 {
                     allPaths.push_back(currentPath);
 
-                    // Check if the path limit has been reached
                     if (pl > 0 && allPaths.size() >= pl)
                     {
                         break;
@@ -358,7 +344,7 @@ namespace Appledore
                             bool vertexInPath = false;
                             for (const auto &pathVertex : currentPath)
                             {
-                                if (pathVertex.id == nextVertex.id)
+                                if (pathVertex == nextVertex)
                                 {
                                     vertexInPath = true;
                                     break;
@@ -379,9 +365,6 @@ namespace Appledore
             return allPaths;
         }
 
-        // Calculate the density of the graph
-        // For undirected graphs: density = (2 * |E|) / (|V| * (|V| - 1))
-        // For directed graphs: density = |E| / (|V| * (|V| - 1))
         [[nodiscard]] double density() const
         {
             if (numVertices <= 1)
@@ -421,19 +404,13 @@ namespace Appledore
                                { return v; });
         }
 
-        // ---------------------------------------------------------
-        // NEW METHOD: countPathsDFS()
-        // Helper Function to count the number of total paths between two vertices using DFS
-        // ---------------------------------------------------------
         size_t countPathsDFS(const VertexType &src, const VertexType &dest)
         {
             if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
                 throw std::invalid_argument("One or both vertices do not exist");
 
-            //  Fixing the previous issue, i.e. Stack for DFS: stores the current vertex and the path taken so far
             std::stack<std::pair<VertexType, std::vector<VertexType>>> stack;
 
-            // Start DFS from the source vertex
             stack.push({src, {src}});
 
             size_t pathCount = 0;
@@ -448,7 +425,6 @@ namespace Appledore
 
                 if (current == dest)
                 {
-                    // Found a valid path to the destination
                     pathCount++;
                 }
                 else
@@ -456,14 +432,13 @@ namespace Appledore
                     size_t currentIndex = vertexToIndex[current];
                     for (size_t i = 0; i < numVertices; ++i)
                     {
-                        // Check if there's an edge from the current vertex to the next vertex
                         if (adjacencyMatrix[getIndex(currentIndex, i)].has_value())
                         {
                             VertexType nextVertex = indexToVertex[i];
                             bool vertexInPath = false;
                             for (const auto &pathVertex : currentPath)
                             {
-                                if (pathVertex.id == nextVertex.id)
+                                if (pathVertex == nextVertex)
                                 {
                                     vertexInPath = true;
                                     break;
@@ -509,9 +484,6 @@ namespace Appledore
             }
         }
 
-        // ---------------------------------------------------------
-        // NEW METHOD: removeVertex()
-        // ---------------------------------------------------------
         void removeVertex(const VertexType &vert)
         {
 
@@ -558,7 +530,6 @@ namespace Appledore
             --numVertices;
         }
 
-        // get the list of isolated vertices
         [[nodiscard]] std::vector<VertexType> getIsolated() const
         {
             if (numVertices == 0)
@@ -584,7 +555,6 @@ namespace Appledore
             return isolatedVertices;
         }
 
-        // Function to update an edge in the GraphMatrix
         void updateEdge(const VertexType &src, const VertexType &dest, const EdgeType &newEdgeValue)
         {
             if (!isWeighted)
