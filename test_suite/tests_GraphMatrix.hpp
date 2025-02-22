@@ -14,20 +14,13 @@ public:
   size_t true_value_totalDegree_v8;
   std::set<custom_vertex_1<std::string>> true_value_getNeighbors_v8;
   GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> ggraph;
-  custom_vertex_1<std::string> v1;
-  custom_vertex_1<std::string> v2;
-  custom_vertex_1<std::string> v3;
-  custom_vertex_1<std::string> v4;
-  custom_vertex_1<std::string> v5;
-  custom_vertex_1<std::string> v6;
-  custom_vertex_1<std::string> v7;
-  custom_vertex_1<std::string> v8;
+  custom_vertex_1<std::string> v1, v2, v3, v4, v5, v6, v7, v8, isolated_vertex;
 
   // Constructor to initialize the vertices and the graph
   C_TestGraphMatrix()
       : v1("vertex_1", true), v2("vertex_2", true), v3("vertex_3", true),
         v4("vertex_4", true), v5("vertex_5", true), v6("vertex_6", true),
-        v7("vertex_7", true), v8("vertex_8", true) {}
+        v7("vertex_7", true), v8("vertex_8", true), isolated_vertex("IsolatedVertex_1", true) {}
 
   std::vector<
       std::pair<custom_vertex_1<std::string>, custom_vertex_1<std::string>>>
@@ -36,7 +29,7 @@ public:
   std::vector<custom_vertex_1<std::string>> true_vertex_vector = {
       v1, v2, v3, v4, v5, v6, v7, v8};
   GraphMatrix<custom_vertex_1<std::string>, int, UndirectedG> create_graph() {
-    ggraph.addVertex(v1, v2, v3, v4, v5, v6, v7, v8);
+    ggraph.addVertex(v1, v2, v3, v4, v5, v6, v7, v8, isolated_vertex);
 
     ggraph.addEdge(v1, v2, 6);
     ggraph.addEdge(v1, v4, 19);
@@ -115,11 +108,62 @@ public:
     }
     printColoredText("✔ test_getVertices() PASSED!", ANSI_COLOR_GREEN);
   }
+  void test_removeVertex() {
+    custom_vertex_1<std::string> test_vertex("Test Vertex", true);
+    ggraph.addVertex(test_vertex);
+    std::vector<custom_vertex_1<std::string>> vert_vec = ggraph.getVertices();
+    bool found_v = false;
+    for (const auto &vertx : vert_vec) {
+      if (test_vertex == vertx)
+        found_v = true;
+    }
+    bool observed_value = false;
+    bool true_value = false;
+    if (found_v) {
+      ggraph.removeVertex(test_vertex);
+      vert_vec = ggraph.getVertices();
+      for (const auto &vertx : vert_vec) {
+        if (test_vertex == vertx)
+          observed_value = true;
+      }
+    }
+    if (observed_value == true_value) {
+      printColoredText("✔ test_removeVertex() PASSED!", ANSI_COLOR_GREEN);
+    } else {
+      printColoredText(std::format("✘ test_removeVertex() FAILED! \n\tGot: {} ",
+                                   test_vertex.get_vertex_name()),
+                       ANSI_COLOR_RED);
+    }
+  }
+  void test_getIsolated(){
+    custom_vertex_1<std::string> new_iso_v("IsolatedVertex_2", true);
+    custom_vertex_1<std::string> new_iso_v1("IsolatedVertex_3", true);
+    ggraph.addVertex(new_iso_v,new_iso_v1);
+    bool true_value = true;
+    bool observed_value = true;
+    std::string got;
+    std::vector<custom_vertex_1<std::string>> isolated_vertices = ggraph.getIsolated();
+    for(const auto& element: isolated_vertices){
+      if(element.get_vertex_name() != "IsolatedVertex_1" && element.get_vertex_name() != "IsolatedVertex_2" && element.get_vertex_name() != "IsolatedVertex_3"){
+        observed_value = false;
+        got += element.get_vertex_name() + " ";
+      }
+    }
+    const std::string expected = R"(IsolatedVertex_1 IsolatedVertex_2 IsolatedVertex_3)";
+    if(isolated_vertices.size() != 3 || true_value != observed_value){
+      printColoredText(std::format("✘ test_getIsolated() FAILED! \n\t Expected: {} \n\tGot: {} ", expected,got), ANSI_COLOR_RED);
+    }
+    else if(true_value == observed_value){
+      printColoredText("✔ test_getIsolated() PASSED!", ANSI_COLOR_GREEN);
+    }
+  }
   void init_tests() {
     test_totalDegree();
     test_getNeighbors();
     test_hasEdge();
     test_getVertices();
+    test_removeVertex();
+    test_getIsolated();
   }
   void show_vertex_data() {
     printColoredText("\nShowing Vertex data \n", ANSI_COLOR_YELLOW);

@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     Appledore::C_TestGraphMatrix tester;
     tester.create_graph();
     tester.init_tests();
-    tester.show_vertex_data();
+    // tester.show_vertex_data();
   } else {
     std::cout << "Usage: " << argv[0] << " graph-matrix" << std::endl;
   }

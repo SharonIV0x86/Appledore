@@ -16,6 +16,36 @@ struct DirectedG {};
 struct UndirectedG {};
 struct UnweightedG {};
 
+template <typename T, typename Enable = void> struct VertexHasher;
+
+template <typename T, typename Enable = void> struct EdgeHasher;
+
+template <typename T>
+struct EdgeHasher<
+    T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T> ||
+                        std::is_same_v<T, std::string>>> {
+  std::size_t operator()(const T &v) const { return std::hash<T>{}(v); }
+};
+template <typename T>
+struct EdgeHasher<T, std::enable_if_t<std::is_class_v<T>>> {
+  std::size_t operator()(const T &v) const { return std::hash<int>{}(v.__id_); }
+};
+
+template <typename T>
+struct VertexHasher<
+    T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T> ||
+                        std::is_same_v<T, std::string>>> {
+  std::size_t operator()(const T &v) const { return std::hash<T>{}(v); }
+};
+
+template <typename T>
+struct VertexHasher<T, std::enable_if_t<std::is_class_v<T>>> {
+  std::size_t operator()(const T &v) const {
+    return std::hash<int>{}(v.__id_) ^
+           (std::hash<std::string>{}(v.__v___name) << 1);
+  }
+};
+
 std::string __generate_vertex_name() {
   std::random_device rd;
   std::mt19937 gen(rd());

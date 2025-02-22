@@ -48,6 +48,10 @@ public:
   bool operator==(const custom_vertex_1 &other) const {
     return vertex_name == other.vertex_name; // Compare based on the vertex name
   }
+  friend std::ostream &operator<<(std::ostream &os, const custom_vertex_1 &c) {
+    os << c.get_vertex_name();
+    return os;
+  }
 };
 template <typename weight_type> class custom_edge_1 : public GraphEdge {
 public:

@@ -22,16 +22,33 @@ public:
 
   template <typename... Vertices> void addVertex(Vertices &&...vertices) {
     auto add_single_vertex = [this](const VertexType &vertex) {
-      if (vertexToIndex.count(vertex))
+      if (vertexToIndex.count(vertex)) {
         return;
+      }
       size_t newIndex = numVertices++;
       vertexToIndex[vertex] = newIndex;
       indexToVertex.push_back(vertex);
     };
 
+    size_t oldSize = numVertices;
+
     (add_single_vertex(std::forward<Vertices>(vertices)), ...);
 
-    adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
+    if (oldSize == numVertices) {
+      return;
+    }
+
+    std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(
+        numVertices * numVertices, std::nullopt);
+
+    for (size_t i = 0; i < oldSize; ++i) {
+      for (size_t j = 0; j < oldSize; ++j) {
+        newMatrix[i * numVertices + j] =
+            std::move(adjacencyMatrix[i * oldSize + j]);
+      }
+    }
+
+    adjacencyMatrix = std::move(newMatrix);
   }
 
   bool operator()(const VertexType &src, const VertexType &dest) {
@@ -215,6 +232,7 @@ public:
     }
     if (isDirected)
       return indegree(vertex) + outdegree(vertex);
+
     size_t vertexIndex = vertexToIndex.at(vertex);
     size_t totaldegree = 0;
     for (size_t srcIndex = 0; srcIndex < numVertices; ++srcIndex) {
@@ -223,6 +241,27 @@ public:
       }
     }
     return totaldegree;
+  }
+  void __show_states() {
+    std::cout << "State of Index to index: ";
+    for (size_t i = 0; i < indexToVertex.size(); ++i) {
+      std::cout << indexToVertex[i] << " ";
+    }
+    std::cout << "\nState of Vertex to index: \n";
+    for (const auto &[first, second] : vertexToIndex) {
+      std::cout << first << " -> " << second << "\n";
+    }
+    std::cout << "\n Adjacency Matrix: \n";
+    for (size_t i = 0; i < numVertices; ++i) {
+      for (size_t j = 0; j < numVertices; ++j) {
+        if (adjacencyMatrix[getIndex(i, j)].has_value()) {
+          std::cout << " 1 ";
+        } else {
+          std::cout << " 0 ";
+        }
+      }
+      std::cout << "\n";
+    }
   }
   std::set<VertexType> getNeighbors(const VertexType &vertex) const {
     if (!vertexToIndex.count(vertex)) {
@@ -498,7 +537,7 @@ public:
   }
 
 private:
-  std::map<VertexType, size_t> vertexToIndex;
+  std::unordered_map<VertexType, size_t, EdgeHasher<VertexType>> vertexToIndex;
   std::vector<VertexType> indexToVertex;
   std::vector<std::optional<EdgeInfo<EdgeType>>> adjacencyMatrix;
   size_t numVertices = 0;
