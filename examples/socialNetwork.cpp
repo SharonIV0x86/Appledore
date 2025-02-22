@@ -4,18 +4,13 @@
 #include <string>
 
 // Custom edge type for friendship details
-class Friendship {
+class Friendship : public Appledore::GraphEdge {
 public:
   int sinceYear;
   std::string friendshipType;
 
   Friendship(int sinceYear = 0, const std::string &friendshipType = "")
       : sinceYear(sinceYear), friendshipType(friendshipType) {}
-
-  bool operator==(const Friendship &other) const {
-    return sinceYear == other.sinceYear &&
-           friendshipType == other.friendshipType;
-  }
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const Friendship &friendship) {

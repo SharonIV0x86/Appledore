@@ -537,7 +537,8 @@ public:
   }
 
 private:
-  std::unordered_map<VertexType, size_t, EdgeHasher<VertexType>> vertexToIndex;
+  std::unordered_map<VertexType, size_t, VertexHasher<VertexType>>
+      vertexToIndex;
   std::vector<VertexType> indexToVertex;
   std::vector<std::optional<EdgeInfo<EdgeType>>> adjacencyMatrix;
   size_t numVertices = 0;

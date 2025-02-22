@@ -3,7 +3,7 @@
 
 using namespace Appledore;
 
-class City {
+class City : public Appledore::GraphVertex {
 public:
   std::string name;
 
@@ -19,7 +19,7 @@ public:
   }
 };
 
-class Road {
+class Road : public Appledore::GraphEdge {
 public:
   int distance;
 

@@ -20,7 +20,8 @@ public:
   C_TestGraphMatrix()
       : v1("vertex_1", true), v2("vertex_2", true), v3("vertex_3", true),
         v4("vertex_4", true), v5("vertex_5", true), v6("vertex_6", true),
-        v7("vertex_7", true), v8("vertex_8", true), isolated_vertex("IsolatedVertex_1", true) {}
+        v7("vertex_7", true), v8("vertex_8", true),
+        isolated_vertex("IsolatedVertex_1", true) {}
 
   std::vector<
       std::pair<custom_vertex_1<std::string>, custom_vertex_1<std::string>>>
@@ -135,25 +136,32 @@ public:
                        ANSI_COLOR_RED);
     }
   }
-  void test_getIsolated(){
+  void test_getIsolated() {
     custom_vertex_1<std::string> new_iso_v("IsolatedVertex_2", true);
     custom_vertex_1<std::string> new_iso_v1("IsolatedVertex_3", true);
-    ggraph.addVertex(new_iso_v,new_iso_v1);
+    ggraph.addVertex(new_iso_v, new_iso_v1);
     bool true_value = true;
     bool observed_value = true;
     std::string got;
-    std::vector<custom_vertex_1<std::string>> isolated_vertices = ggraph.getIsolated();
-    for(const auto& element: isolated_vertices){
-      if(element.get_vertex_name() != "IsolatedVertex_1" && element.get_vertex_name() != "IsolatedVertex_2" && element.get_vertex_name() != "IsolatedVertex_3"){
+    std::vector<custom_vertex_1<std::string>> isolated_vertices =
+        ggraph.getIsolated();
+    for (const auto &element : isolated_vertices) {
+      if (element.get_vertex_name() != "IsolatedVertex_1" &&
+          element.get_vertex_name() != "IsolatedVertex_2" &&
+          element.get_vertex_name() != "IsolatedVertex_3") {
         observed_value = false;
         got += element.get_vertex_name() + " ";
       }
     }
-    const std::string expected = R"(IsolatedVertex_1 IsolatedVertex_2 IsolatedVertex_3)";
-    if(isolated_vertices.size() != 3 || true_value != observed_value){
-      printColoredText(std::format("✘ test_getIsolated() FAILED! \n\t Expected: {} \n\tGot: {} ", expected,got), ANSI_COLOR_RED);
-    }
-    else if(true_value == observed_value){
+    const std::string expected =
+        R"(IsolatedVertex_1 IsolatedVertex_2 IsolatedVertex_3)";
+    if (isolated_vertices.size() != 3 || true_value != observed_value) {
+      printColoredText(
+          std::format(
+              "✘ test_getIsolated() FAILED! \n\t Expected: {} \n\tGot: {} ",
+              expected, got),
+          ANSI_COLOR_RED);
+    } else if (true_value == observed_value) {
       printColoredText("✔ test_getIsolated() PASSED!", ANSI_COLOR_GREEN);
     }
   }
