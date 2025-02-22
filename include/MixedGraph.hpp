@@ -12,7 +12,9 @@ namespace Appledore
     class MixedGraphMatrix : public Appledore::MatrixRepresentation<VertexType, EdgeType>
     {
     public:
-        void addVertex(const VertexType &vertex);
+        template <typename... VertexArgs>
+        void addVertex(VertexArgs &&...vertices);
+        size_t getNumVertices() const;
         const std::vector<VertexType> &getVertices() const;
         bool hasEdge(const VertexType &src, const VertexType &dest) const;
         EdgeType getEdgeValue(const VertexType &src, const VertexType &dest) const;
@@ -51,20 +53,42 @@ namespace Appledore
     };
 
     template <typename VertexType, typename EdgeType>
-    void MixedGraphMatrix<VertexType, EdgeType>::addVertex(const VertexType &vertex)
-    {
-        if (vertexToIndex.count(vertex))
-        {
-            std::cout << "Vertex already exists\n";
+    template <typename... Vertices>
+    void MixedGraphMatrix<VertexType, EdgeType>::addVertex(Vertices &&...vertices) {
+        auto add_single_vertex = [this](const VertexType &vertex) {
+          if (vertexToIndex.count(vertex)) {
             return;
+          }
+          size_t newIndex = numVertices++;
+          vertexToIndex[vertex] = newIndex;
+          indexToVertex.push_back(vertex);
+        };
+    
+        size_t oldSize = numVertices;
+    
+        (add_single_vertex(std::forward<Vertices>(vertices)), ...);
+    
+        if (oldSize == numVertices) {
+          return;
         }
+    
+        std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(
+            numVertices * numVertices, std::nullopt);
+    
+        for (size_t i = 0; i < oldSize; ++i) {
+          for (size_t j = 0; j < oldSize; ++j) {
+            newMatrix[i * numVertices + j] =
+                std::move(adjacencyMatrix[i * oldSize + j]);
+          }
+        }
+    
+        adjacencyMatrix = std::move(newMatrix);
+      }
 
-        size_t newIndex = numVertices;
-        vertexToIndex[vertex] = newIndex;
-        indexToVertex.push_back(vertex);
-        numVertices++;
-
-        adjacencyMatrix.resize(numVertices * numVertices, std::nullopt);
+    template <typename VertexType, typename EdgeType>
+    size_t Appledore::MixedGraphMatrix<VertexType, EdgeType>::getNumVertices() const
+    {
+        return numVertices;
     }
 
     template <typename VertexType, typename EdgeType>
@@ -274,7 +298,7 @@ namespace Appledore
 
         --numVertices;
     }
-   
+
     template <typename VertexType, typename EdgeType>
     size_t MixedGraphMatrix<VertexType, EdgeType>::indegree(const VertexType &vertex) const
     {
