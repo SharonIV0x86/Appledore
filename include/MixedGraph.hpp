@@ -35,6 +35,90 @@ public:
   const bool operator()(VertexType src, VertexType dest) const {
     if (!vertexToIndex.count(src) || !vertexToIndex.count(dest)) {
       return false;
+
+namespace Appledore
+{
+    template <typename VertexType, typename EdgeType = bool>
+    class MixedGraphMatrix : public Appledore::MatrixRepresentation<VertexType, EdgeType>
+    {
+    public:
+        template <typename... VertexArgs>
+        void addVertex(VertexArgs &&...vertices);
+        size_t getNumVertices() const;
+        const std::vector<VertexType> &getVertices() const;
+        bool hasEdge(const VertexType &src, const VertexType &dest) const;
+        EdgeType getEdgeValue(const VertexType &src, const VertexType &dest) const;
+        std::vector<EdgeType> getEdges() const;
+        MixedGraphMatrix() : vertexToIndex(), indexToVertex(), adjacencyMatrix() {};
+        void removeEdge(const VertexType &src, const VertexType &dest);
+        void updateEdge(const VertexType &, const VertexType &, const EdgeType &);
+        void addEdge(const VertexType &src, const VertexType &dest, std::optional<EdgeType> edgeValue, bool isDirected = false);
+        void addEdge(const VertexType &src, const VertexType &dest, bool isDirected);
+        void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge);
+        void addEdge(const VertexType &src, const VertexType &dest, const EdgeType &edge, bool isDirected);
+        void removeVertex(const VertexType &vert);
+
+        [[nodiscard]] size_t indegree(const VertexType &vertex) const;
+        [[nodiscard]] size_t outdegree(const VertexType &vertex) const;
+        [[nodiscard]] size_t totalDegree(const VertexType &vertex) const;
+
+        const bool operator()(VertexType src, VertexType dest) const
+        {
+            if (!vertexToIndex.count(src) || !vertexToIndex.count(dest))
+            {
+                return false;
+            }
+            size_t srcIndex = vertexToIndex.at(src);
+            size_t destIndex = vertexToIndex.at(dest);
+            size_t index = getIndex(srcIndex, destIndex);
+            return adjacencyMatrix[index].has_value();
+        }
+
+    private:
+        std::map<VertexType, size_t> vertexToIndex;
+        std::vector<VertexType> indexToVertex;
+        std::vector<std::optional<EdgeInfo<EdgeType>>> adjacencyMatrix;
+        size_t numVertices = 0;
+        inline size_t getIndex(size_t src, size_t dest) const;
+    };
+
+    template <typename VertexType, typename EdgeType>
+    template <typename... Vertices>
+    void MixedGraphMatrix<VertexType, EdgeType>::addVertex(Vertices &&...vertices) {
+        auto add_single_vertex = [this](const VertexType &vertex) {
+          if (vertexToIndex.count(vertex)) {
+            return;
+          }
+          size_t newIndex = numVertices++;
+          vertexToIndex[vertex] = newIndex;
+          indexToVertex.push_back(vertex);
+        };
+    
+        size_t oldSize = numVertices;
+    
+        (add_single_vertex(std::forward<Vertices>(vertices)), ...);
+    
+        if (oldSize == numVertices) {
+          return;
+        }
+    
+        std::vector<std::optional<EdgeInfo<EdgeType>>> newMatrix(
+            numVertices * numVertices, std::nullopt);
+    
+        for (size_t i = 0; i < oldSize; ++i) {
+          for (size_t j = 0; j < oldSize; ++j) {
+            newMatrix[i * numVertices + j] =
+                std::move(adjacencyMatrix[i * oldSize + j]);
+          }
+        }
+    
+        adjacencyMatrix = std::move(newMatrix);
+      }
+
+    template <typename VertexType, typename EdgeType>
+    size_t Appledore::MixedGraphMatrix<VertexType, EdgeType>::getNumVertices() const
+    {
+        return numVertices;
     }
     size_t srcIndex = vertexToIndex.at(src);
     size_t destIndex = vertexToIndex.at(dest);
@@ -321,6 +405,27 @@ size_t MixedGraphMatrix<VertexType, EdgeType>::totalDegree(
       } else {
         ++totalDegreeCount;
       }
+
+    template <typename VertexType, typename EdgeType>
+    size_t MixedGraphMatrix<VertexType, EdgeType>::indegree(const VertexType &vertex) const
+    {
+        if (!vertexToIndex.count(vertex))
+        {
+            throw std::invalid_argument("Vertex does not exist");
+        }
+
+        size_t vertexIndex = vertexToIndex.at(vertex);
+        size_t inDegreeCount = 0;
+
+        for (size_t src = 0; src < numVertices; ++src)
+        {
+            if (adjacencyMatrix[getIndex(src, vertexIndex)].has_value())
+            {
+                ++inDegreeCount;
+            }
+        }
+
+        return inDegreeCount;
     }
 
     if (adjacencyMatrix[backwardIndex].has_value() &&
