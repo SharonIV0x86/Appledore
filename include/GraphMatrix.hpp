@@ -583,6 +583,74 @@ namespace Appledore
                 adjacencyMatrix[getIndex(destIndex, srcIndex)] = EdgeInfo<EdgeType>(newEdgeValue);
             }
         }
+        bool isCyclicDirectedDFS(const size_t v, std::vector<bool> &visited, std::vector<bool> &recStack) const {
+            visited[v] = true;
+            recStack[v] = true;
+
+            for (size_t dest = 0; dest < numVertices; ++dest) {
+                if (!adjacencyMatrix[getIndex(v, dest)].has_value()) {
+                    continue;
+                }
+
+                if (!visited[dest]) {
+                    if (isCyclicDirectedDFS(dest, visited, recStack)) {
+                        return true;
+                    }
+                } else if (recStack[dest]) {
+                    return true;
+                }
+            }
+
+            recStack[v] = false;
+            return false;
+        }
+
+        bool isCyclicUndirectedDFS(size_t v, size_t parent, std::vector<bool> &visited) const {
+            visited[v] = true;
+
+            for (size_t dest = 0; dest < numVertices; ++dest) {
+                if (!adjacencyMatrix[getIndex(v, dest)].has_value()) {
+                    continue;
+                }
+
+                if (!visited[dest]) {
+                    if (isCyclicUndirectedDFS(dest, v, visited)) {
+                        return true;
+                    }
+                } else if (dest != parent) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        [[nodiscard]] bool isCyclic() const {
+            std::vector<bool> visited(numVertices, false);
+
+            if (isDirected) {
+                std::vector<bool> recStack(numVertices, false);
+                for (size_t i = 0; i < numVertices; ++i) {
+                    if (visited[i]) {
+                        continue;
+                    }
+                    if (isCyclicDirectedDFS(i, visited, recStack)) {
+                        return true;
+                    }
+                }
+            } else {
+                for (size_t i = 0; i < numVertices; ++i) {
+                    if (visited[i]) {
+                        continue;
+                    }
+                    if (isCyclicUndirectedDFS(i, -1, visited)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
 
     private:
         std::map<VertexType, size_t> vertexToIndex;
