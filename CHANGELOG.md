@@ -1,4 +1,17 @@
 # Changelog
+
+## [3.0.0] Major Release 22nd February 2025
+This release introduces API-breaking changes. Upgrading to ``v3.0.0`` is recommended.
+
+- Added support for users to defined custom names for vertices and edges. 
+- Optimized Storage, Replaced ``std::map`` with ``std::unordered_map`` in **GraphMatrix** and **MixedGraphMatrix**.
+- Enhanced Vertex Management, ``addVertex`` in **GraphMatrix** and MixedGraphMatrix now supports variadic arguments for more flexible vertex creation.
+- Cycle Detection, Introduced ``isCyclic()`` method in **GraphMatrix** to check for cycles in the graph.
+- Custom Hashing Support, Added template specializations for hashing custom vertices and edges, ensuring better compatibility with ``std::unordered_map``.
+- Improved Example Code, Fixed and updated all examples in the ``/examples`` folder to align with API changes.
+- Expanded Test Suite: Added more test cases and enhanced Appledore's test framework for better tests coverage.
+- Linting on all files using ``clang-format``.
+
 ## [2.1.0] - Released: 24th January 2025
 ### Minor Release
 - Fixed ``removeVertex`` method in ``MixedGraph.h``

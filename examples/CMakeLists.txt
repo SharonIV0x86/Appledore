@@ -12,7 +12,6 @@ file(GLOB SOURCES "*.cpp")
 
 # Loop through all .cpp files and create executables
 foreach(source_file ${SOURCES})
-    # Extract file name without extension
     get_filename_component(target_name ${source_file} NAME_WE)
     add_executable(${target_name} ${source_file})
 endforeach()
