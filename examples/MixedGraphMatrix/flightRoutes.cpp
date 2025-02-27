@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../include/MixedGraph.hpp"
+#include "../../include/MixedGraph.hpp"
 
 // Custom edge type for flight details
 class FlightRoute

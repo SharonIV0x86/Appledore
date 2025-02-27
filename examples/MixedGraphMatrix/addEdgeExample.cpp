@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/MixedGraph.hpp"
+#include "../../include/MixedGraph.hpp"
 
 int main()
 {

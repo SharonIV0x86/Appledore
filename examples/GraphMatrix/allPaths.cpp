@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stack>
-#include "../include/GraphMatrix.hpp"
+#include "../../include/GraphMatrix.hpp"
 
 using namespace Appledore;
 

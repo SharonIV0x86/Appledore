@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include "../include/GraphMatrix.hpp" 
+#include "../../include/GraphMatrix.hpp" 
 
 // Custom edge type for friendship details
 class Friendship
