@@ -1,4 +1,4 @@
-#include "../include/MixedGraph.hpp"
+#include "../../include/MixedGraph.hpp"
 #include <iostream>
 #include <string>
 

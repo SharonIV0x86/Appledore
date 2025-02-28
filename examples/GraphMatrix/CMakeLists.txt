@@ -7,10 +7,6 @@ project(Appledore-v2.0.0)
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
 
-# Add subdirectories
-add_subdirectory(GraphMatrix)
-add_subdirectory(MixedGraphMatrix)
-
 # Automatically collect all .cpp files in the current directory
 file(GLOB SOURCES "*.cpp")
 
@@ -19,4 +15,7 @@ foreach(source_file ${SOURCES})
     # Extract file name without extension
     get_filename_component(target_name ${source_file} NAME_WE)
     add_executable(${target_name} ${source_file})
+    # Include directories for the executable
+    target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
+
