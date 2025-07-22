@@ -1,11 +1,12 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <string_view>
+#include <string>
 #include "../include/GraphMatrix.hpp"
-using namespace Appledore;
 
-namespace Appledore
-{
+namespace Appledore {
+
     // ANSI escape codes for text colors
     constexpr std::string_view ANSI_COLOR_RED = "\x1b[31m";
     constexpr std::string_view ANSI_COLOR_GREEN = "\x1b[32m";
@@ -13,67 +14,64 @@ namespace Appledore
     constexpr std::string_view ANSI_COLOR_BLUE = "\x1b[34m";
     constexpr std::string_view ANSI_COLOR_MAGENTA = "\x1b[35m";
     constexpr std::string_view ANSI_COLOR_CYAN = "\x1b[36m";
-    constexpr std::string_view ANSI_COLOR_RESET = "\x1b[0m"; // escape code to reset the color after printing the colored text
-    // string_view provides a lightweight object that offers read-only access to a string or a part of a string
-    inline void printColoredText(std::string text, std::string_view colorCode)
-    {
-        std::cout << colorCode << text << ANSI_COLOR_RESET << "\n";
+    constexpr std::string_view ANSI_COLOR_RESET = "\x1b[0m";
+
+    inline void printColoredText(const std::string& text, std::string_view colorCode) {
+        std::cout << colorCode << text << ANSI_COLOR_RESET << '\n';
     }
-    template <typename type_store_data>
-    class custom_vertex_1 : public GraphVertex
-    {
-        type_store_data vertex_name;
+
+    template <typename T>
+    class custom_vertex_1 : public GraphVertex {
+        T vertex_name;
 
     public:
         std::vector<int> random_data;
-        custom_vertex_1(type_store_data v_name, bool seed_random = false)
+
+        custom_vertex_1(const T& v_name, bool seed_random = false) 
+            : vertex_name(v_name) 
         {
-            vertex_name = v_name;
-            if (seed_random)
-            {
+            random_data.reserve(20);
+
+            if (seed_random) {
                 std::random_device rd;
                 std::mt19937 engine(rd());
                 std::uniform_int_distribution<int> dist(1, 100);
-
-                for (int i = 0; i < 20; ++i)
-                {
+                for (int i = 0; i < 20; ++i) {
                     random_data.push_back(dist(engine));
                 }
-            }
-            else
-            {
-                for (int i = 0; i < 20; i++)
-                    random_data.push_back(i + 1);
+            } else {
+                for (int i = 1; i <= 20; ++i) {
+                    random_data.push_back(i);
+                }
             }
         }
-        [[nodiscard]] type_store_data get_vertex_name() const
-        {
+
+        [[nodiscard]] T get_vertex_name() const noexcept {
             return vertex_name;
         }
-        void show_random_data() const
-        {
-            for (const auto &ae : random_data)
-            {
-                std::cout << ae << " ";
+
+        void show_random_data() const {
+            for (const int val : random_data) {
+                std::cout << val << ' ';
             }
+            std::cout << '\n';
         }
-        bool operator==(const custom_vertex_1 &other) const
-        {
-            return vertex_name == other.vertex_name; // Compare based on the vertex name
+
+        bool operator==(const custom_vertex_1& other) const noexcept {
+            return vertex_name == other.vertex_name;
         }
     };
-    template <typename weight_type>
-    class custom_edge_1 : public GraphEdge
-    {
+
+    template <typename W>
+    class custom_edge_1 : public GraphEdge {
     public:
-        weight_type weight;
-        custom_edge_1(weight_type w) : weight(w) {};
+        W weight;
+
+        explicit custom_edge_1(W w) : weight(w) {}
     };
 
-    // helper types for future dev, not being used as of now.
-    namespace PrimitiveVertexEdges_T
-    {
-
+    // Primitive types for testing/customization
+    namespace PrimitiveVertexEdges_T {
         using vertex_primitive_1_t = int;
         using edge_primitive_1_t = float;
 
@@ -87,9 +85,7 @@ namespace Appledore
         using edge_primitive_4_t = int;
     }
 
-    namespace CustomVertexEdges_T
-    {
-
+    namespace CustomVertexEdges_T {
         using CustomVertex_1 = custom_vertex_1<PrimitiveVertexEdges_T::vertex_primitive_1_t>;
         using CustomEdge_1 = custom_edge_1<PrimitiveVertexEdges_T::edge_primitive_1_t>;
 
