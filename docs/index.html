@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appledore - Modern C++ Graph Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <div class="logo">Appledore</div>
+            <button id="menu-toggle" aria-label="Toggle Menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Appledore <span class="version">v2.0.0</span></div>
+                <div class="search-container">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" placeholder="Search docs..." id="search-input">
+                    <span class="cmd-shortcut">⌘K</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-title">Getting Started</div>
+                    <a href="#introduction" class="nav-item active">Introduction</a>
+                    <a href="#features" class="nav-item">Features</a>
+                    <a href="#installation" class="nav-item">Installation</a>
+                </div>
+
+                <div class="nav-group">
+                    <div class="nav-title">Usage & Examples</div>
+                    <a href="#directed-graph" class="nav-item">Directed Graph</a>
+                    <a href="#undirected-graph" class="nav-item">Undirected Graph</a>
+                    <a href="#mixed-graph" class="nav-item">Mixed Graph</a>
+                </div>
+
+                <div class="nav-group">
+                    <div class="nav-title">Community</div>
+                    <a href="#contributing" class="nav-item">Contributing</a>
+                    <a href="#code-of-conduct" class="nav-item">Code of Conduct</a>
+                    <a href="#license" class="nav-item">License</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            <article class="doc-content">
+
+                <section id="introduction" class="section">
+                    <h1>Appledore</h1>
+                    <p class="lead">A simple and efficient graph library in modern C++. Supports directed/undirected
+                        graphs with customizable edge type and vertices, designed for performance and ease of use.</p>
+
+                    <div class="badges">
+                        <span class="badge">C++20</span>
+                        <span class="badge">Header Only</span>
+                        <span class="badge">MIT License</span>
+                    </div>
+                </section>
+
+                <hr class="divider">
+
+                <section id="features" class="section">
+                    <h2>Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h3>Adjacency Matrix</h3>
+                            <p>Efficient matrix-based representation for dense graphs.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>Adjacency List</h3>
+                            <p>Optimized list-based representation for sparse graphs.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>Custom Types</h3>
+                            <p>Full support for custom vertex and edge types (classes/structs).</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>Easy Querying</h3>
+                            <p>Simple API to query graph structure and properties.</p>
+                        </div>
+                    </div>
+                    <div class="callout info">
+                        <strong>Upcoming Features:</strong> Support for graph degrees, advanced algorithms (Dijkstra,
+                        BFS, DFS), and analysis utilities.
+                    </div>
+                </section>
+
+                <hr class="divider">
+
+                <section id="installation" class="section">
+                    <h2>Installation</h2>
+                    <p>Appledore is easy to integrate. Follow these steps to get started:</p>
+
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h3>Clone the repository</h3>
+                            <pre><code class="language-bash">git clone https://github.com/SharonIV0X86/Appledore</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h3>Include the header</h3>
+                            <p>Include the <code>GraphMatrix.hpp</code> header in your project files.</p>
+                            <pre><code class="language-cpp">#include "../include/GraphMatrix.hpp"</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="divider">
+
+                <section id="directed-graph" class="section">
+                    <h2>Directed Graph Example</h2>
+                    <p>Implementation of a Graph relationship between Airports and Distances.</p>
+
+                    <div class="code-block-wrapper">
+                        <div class="code-header">
+                            <span>main.cpp</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+                        <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include "../include/GraphMatrix.hpp"
+
+using namespace Appledore;
+
+class Airport : public GraphVertex {
+public:
+    std::string name;
+    Airport(std::string name) : name(name) {};
+    friend std::ostream &operator&lt;&lt;(std::ostream &os, const Airport &airport) {
+        os &lt;&lt; airport.name;
+        return os;
+    }
+};
+
+class Flight {
+public:
+    int distance;
+    Flight(int dis) : distance(dis) {};
+    friend std::ostream &operator&lt;&lt;(std::ostream &os, const Flight &flight) {
+        os &lt;&lt; flight.distance &lt;&lt; " miles";
+        return os;
+    }
+};
+
+int main() {
+    GraphMatrix&lt;Airport, Flight, DirectedG&gt; AirportsGraph;
+    // ... Additional setup code ...
+}</code></pre>
+                    </div>
+                    <p>See the <a href="https://github.com/SharonIV0x86/Appledore/blob/main/examples/directedGraph.cpp"
+                            target="_blank">full example here</a>.</p>
+                </section>
+
+                <hr class="divider">
+
+                <section id="undirected-graph" class="section">
+                    <h2>Undirected Graph Example</h2>
+                    <p>Using <code>UndirectedG</code> for bidirectional relationships.</p>
+                    <div class="code-block-wrapper">
+                        <pre><code class="language-cpp">GraphMatrix&lt;Airport, Flight, UndirectedG&gt; AirportGraph;
+AirportGraph.addVertex(LAX, JFK, DEN, ATL);
+AirportGraph.addEdge(LAX, DEN, flight1);
+</code></pre>
+                    </div>
+                </section>
+
+                <hr class="divider">
+
+                <section id="mixed-graph" class="section">
+                    <h2>Mixed Graph Example</h2>
+                    <p>Using <code>MixedGraphMatrix</code> to combine different transportation modes.</p>
+                    <div class="code-block-wrapper">
+                        <pre><code class="language-cpp">Appledore::MixedGraphMatrix&lt;State, Connection&gt; americaNetwork;
+americaNetwork.addEdge(california, texas, roadConnection, false); // false = undirected
+americaNetwork.addEdge(texas, florida, airConnection, true);      // true = directed
+</code></pre>
+                    </div>
+                </section>
+
+                <hr class="divider">
+
+                <section id="contributing" class="section">
+                    <h2>Contributing</h2>
+                    <p>We welcome contributions! Please follow these steps:</p>
+                    <ol class="list-ordered">
+                        <li><strong>Create an issue</strong> for any bug or feature request.</li>
+                        <li><strong>Fork</strong> the repository.</li>
+                        <li><strong>Create a branch</strong>: <code>git checkout -b feature/name</code></li>
+                        <li><strong>Submit a Pull Request</strong>.</li>
+                    </ol>
+                    <p>Refer to <a href="#code-of-conduct">Code of Conduct</a> for community guidelines.</p>
+                </section>
+
+                <hr class="divider">
+
+                <section id="code-of-conduct" class="section">
+                    <h2>Code of Conduct</h2>
+                    <p>This project follows a community-driven Code of Conduct to ensure a respectful and inclusive
+                        environment.</p>
+                </section>
+
+                <section id="license" class="section">
+                    <h2>License</h2>
+                    <p>This project is licensed under the <strong>MIT License</strong>.</p>
+                </section>
+
+            </article>
+
+            <footer class="doc-footer">
+                <p>&copy; 2026 Appledore Contributors. Licensed under MIT.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
