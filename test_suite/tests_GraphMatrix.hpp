@@ -8,6 +8,33 @@ using namespace Appledore;
 
 namespace Appledore
 {
+
+
+    class TestGraphMatrix_GetEdge {
+        public:
+            TestGraphMatrix_GetEdge() {
+                // Create a sample graph
+                graph.addVertex(1);
+                graph.addVertex(2);
+                graph.addEdge(1, 2, 5);
+        
+                observed_value = graph.getEdge(1, 2);
+                true_value = 5;
+            }
+        
+            void runTest() {
+                if (observed_value == true_value)
+                    std::cout << "Test GetEdge PASSED\n";
+                else
+                    std::cout << "Test GetEdge FAILED\n";
+            }
+        
+        private:
+            GraphMatrix<int, int, DirectedG> graph;
+            int observed_value;
+            int true_value;
+        };
+        
     // testing class with custom vertex and edge types.
     class C_TestGraphMatrix
     {
